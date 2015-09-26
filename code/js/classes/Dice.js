@@ -72,6 +72,11 @@ class Dice
         this.debug();
     }
 
+    hasOptionalDice()
+    {
+        return (this.totalOptionalFood() > 0 || this.totalOptionalWorkers() > 0);
+    }
+
     total(type, dieFace)
     {
         var total = 0;
