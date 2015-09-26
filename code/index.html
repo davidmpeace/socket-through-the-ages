@@ -132,6 +132,41 @@
                         </div>
                     </div>
 
+                    <h3>Developments</h3>
+                    <table class="table table-bordered" style='padding: 2px'>
+                      
+                        <tr>
+                            <th style='padding: 2px'>Cost</th>
+                            <th style='padding: 2px'>Owned</th>
+                            <th style='padding: 2px'>Name</th>
+                            <th style='padding: 2px'>Points</th>
+                            <th style='padding: 2px'>Effect</th>
+                        </tr>
+                        <tr ng-repeat="development in player.developments.developments">
+                            <td style='padding: 2px'>{{development.cost}}</td>
+                            <td style='padding: 2px'>{{development.purchased}}</td>
+                            <td style='padding: 2px'>{{development.name}}</td>
+                            <td style='padding: 2px'>{{development.points}}</td>
+                            <td style='padding: 2px'>{{development.effect}}</td>
+                        </tr>
+                    </table>
+
+                    <h3>Monuments</h3>
+                    <table class="table table-bordered" style='padding: 2px'>
+                      
+                        <tr>
+                            <th style='padding: 2px'>Name</th>
+                            <th style='padding: 2px'>Completed</th>
+                            <th style='padding: 2px'>Spaces</th>
+                            <th style='padding: 2px'>Points</th>
+                        </tr>
+                        <tr ng-repeat="monument in player.monuments.monuments">
+                            <td style='padding: 2px'>{{monument.name}}</td>
+                            <td style='padding: 2px'>{{monument.completed}}</td>
+                            <td style='padding: 2px'>{{monument.filledSpaces}} / {{monument.totalSpaces}}</td>
+                            <td style='padding: 2px'>{{monument.pointsFirst}} / {{monument.pointsNotFirst}}</td>
+                        </tr>
+                    </table>
 
                 </div>
 
@@ -149,25 +184,25 @@
             $scope.game = new Game();
             $scope.player = $scope.game.addPlayer();
             $scope.player.cities.addWorkers(5);
-            // $scope.player.monuments.addWorkersTo("Step Pyramid", 3);
-            // $scope.player.monuments.addWorkersTo("Great Wall", 13);
-            // $scope.player.monuments.addWorkersTo("Great Pyramid", 15);
-            // $scope.player.monuments.addWorkersTo("Hanging Gardens", 11);
-            // $scope.player.monuments.addWorkersTo("Temple", 7);
-            // $scope.player.monuments.addWorkersTo("Stone Circle", 5);
-            // // $scope.player.roll();
-            // $scope.player.developments.purchase("Quarrying");
-            // $scope.player.developments.purchase("Agriculture");
-            // $scope.player.developments.purchase("Coinage");
-            // $scope.player.developments.purchase("Masonry");
+            $scope.player.monuments.addWorkersTo("Step Pyramid", 3);
+            $scope.player.monuments.addWorkersTo("Great Wall", 13);
+            $scope.player.monuments.addWorkersTo("Great Pyramid", 15);
+            $scope.player.monuments.addWorkersTo("Hanging Gardens", 11);
+            $scope.player.monuments.addWorkersTo("Temple", 7);
+            $scope.player.monuments.addWorkersTo("Stone Circle", 5);
+            // $scope.player.roll();
+            $scope.player.developments.purchase("Quarrying");
+            $scope.player.developments.purchase("Agriculture");
+            $scope.player.developments.purchase("Coinage");
+            $scope.player.developments.purchase("Masonry");
             $scope.player.developments.purchase("Irrigation");
-            // $scope.player.developments.purchase("Empire");
-            // $scope.player.developments.purchase("Architecture");
-            // $scope.player.developments.purchase("Engineering");
-            // $scope.player.developments.purchase("Graneries");
-            // $scope.player.goods.add(13);
-            // $scope.player.addFood(12);
-            // $scope.player.disasters = 0;
+            $scope.player.developments.purchase("Empire");
+            $scope.player.developments.purchase("Architecture");
+            $scope.player.developments.purchase("Engineering");
+            $scope.player.developments.purchase("Graneries");
+            $scope.player.goods.add(13);
+            $scope.player.addFood(12);
+            $scope.player.disasters = 0;
             $scope.player.debug();
 
             $scope.toggleDice = function(diceIndex) 

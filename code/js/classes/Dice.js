@@ -45,6 +45,8 @@ class Dice
             DICE_COINS,
             DICE_1_SKULL_AND_2_GOODS
         ];
+
+        this.diceToKeep = [];
     }
 
     leadershipRoll()
