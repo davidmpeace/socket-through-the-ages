@@ -5,7 +5,8 @@ class Goods
     {
         this.game   = game;
         this.player = player;
-        this.goodTypes  = ['wood','stone','pottery','cloth','spearhead'];
+        this.goodTypes          = ['wood','stone','pottery','cloth','spearhead'];
+        this.goodTypesReversed  = ['spearhead','cloth','pottery','stone','wood'];
         this.goodValues = {
             "spearhead": [0,5,15,30,50],
             "cloth":     [0,4,12,24,40,60],

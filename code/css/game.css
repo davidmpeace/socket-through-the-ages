@@ -78,3 +78,66 @@ body
 {
     background-color: #f6eee1;
 }
+
+#myGoods
+{
+
+}
+
+#myGoods .goods
+{
+
+}
+
+#myGoods .goods .good
+{
+    height: 14px;
+    font-size: 12px;
+    line-height: 14px;
+    margin-bottom: 2px;
+}
+
+#myGoods .goods .good .type
+{
+    text-transform: capitalize;
+    display: inline-block;
+    width: 100px;
+}
+
+#myGoods .goods .good .cost
+{
+    display: inline-block;
+    width: 25px;
+    margin-right: 2px;
+    text-align: center;
+}
+
+#myGoods .goods .good .cost.selected
+{
+    color: #fff;
+}
+
+#myGoods .goods .good.spearhead .cost.selected
+{
+    background-color: #d64705;
+}
+
+#myGoods .goods .good.cloth .cost.selected
+{
+    background-color: #114683;
+}
+
+#myGoods .goods .good.pottery .cost.selected
+{
+    background-color: #981719;
+}
+
+#myGoods .goods .good.stone .cost.selected
+{
+    background-color: #727278;
+}
+
+#myGoods .goods .good.wood .cost.selected
+{
+    background-color: #462f3a;
+}
