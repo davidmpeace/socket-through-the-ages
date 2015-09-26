@@ -77,9 +77,15 @@ class Dice
         var total = 0;
         for( var i in this.dice ) {
             var die = this.dice[i];
-            if( typeof dieFace == "undefined" || die == dieFace ) {
+
+            var chosenSide = false;
+            if( (dieFace == DICE_3_FOOD && die == DICE_2_FOOD) || (dieFace == DICE_3_WORKERS && die == DICE_2_WORKERS) ) {
+                chosenSide = true;
+            }
+
+            if( typeof dieFace == "undefined" || die == dieFace || chosenSide ) {
                 if( type == 'FOOD' ) {
-                    if( die == DICE_3_FOOD || die == DICE_2_FOOD_OR_2_WORKERS ) {
+                    if( die == DICE_3_FOOD || die == DICE_2_FOOD_OR_2_WORKERS || die == DICE_2_FOOD ) {
                         total += (die == DICE_3_FOOD) ? 3 : 2;
 
                         if( this.player.developments.has("Agriculture") ) {
@@ -87,7 +93,7 @@ class Dice
                         }
                     }
                 } else if( type == 'WORKERS' ) {
-                    if( die == DICE_3_WORKERS || die == DICE_2_FOOD_OR_2_WORKERS ) {
+                    if( die == DICE_3_WORKERS || die == DICE_2_FOOD_OR_2_WORKERS || die == DICE_2_WORKERS ) {
                         total += (die == DICE_3_WORKERS) ? 3 : 2;
 
                         if( this.player.developments.has("Masonry") ) {
