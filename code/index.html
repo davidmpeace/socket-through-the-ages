@@ -38,13 +38,12 @@
         {
             $scope.game = new Game();
             $scope.player = $scope.game.addPlayer();
-            $scope.player.cities.addWorkers(4);
+            $scope.player.cities.addWorkers(18);
             // $scope.player.roll();
             $scope.player.developments.purchase("Quarrying");
             $scope.player.developments.purchase("Agriculture");
             $scope.player.developments.purchase("Coinage");
             $scope.player.developments.purchase("Masonry");
-            $scope.player.cities.addWorkers(4);
             $scope.player.goods.add(8);
             $scope.player.disasters = 22;
             $scope.player.debug();
