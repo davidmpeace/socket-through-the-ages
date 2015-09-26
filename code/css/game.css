@@ -13,11 +13,12 @@ body
     display: inline-block;
     cursor: pointer;
     background-color: #f6daa9;
+    margin: 3px;
 }
 
-.dice.selected
+.dice.frozen
 {
-    border: 2px solid #ba5e5e;
+    border: 2px solid #fa2525;
     /*background-color: #fcc6bd;*/
 }
 
