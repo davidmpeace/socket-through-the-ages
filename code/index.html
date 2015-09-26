@@ -159,12 +159,14 @@
                             <th style='padding: 2px'>Completed</th>
                             <th style='padding: 2px'>Spaces</th>
                             <th style='padding: 2px'>Points</th>
+                            <th style='padding: 2px'>First Completed By</th>
                         </tr>
                         <tr ng-repeat="monument in player.monuments.monuments" ng-class='{success: monument.completed, warning: !monument.completed && monument.filledSpaces > 0}'>
                             <td style='padding: 2px'>{{monument.name}}</td>
                             <td style='padding: 2px'>{{monument.completed}}</td>
                             <td style='padding: 2px'>{{monument.filledSpaces}} / {{monument.totalSpaces}}</td>
                             <td style='padding: 2px'>{{monument.pointsFirst}} / {{monument.pointsNotFirst}}</td>
+                            <td style='padding: 2px'></td>
                         </tr>
                     </table>
 
