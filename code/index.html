@@ -5,6 +5,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.6/angular.min.js"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="css/game.css">
 
         <script type="text/javascript">
         "use strict";
@@ -22,24 +23,31 @@
 
     </head>
     <body>
-        <div ng-controller="GameController">
+        <div ng-controller="GameController" ng-cloak>
+
+            <div class='dice' ng-repeat='dice in player.dice.dice track by $index' ng-if='player.dice'>
+                <img ng-src='img/{{dice}}.png' />
+            </div>
+
+            <button class='btn btn-primary' ng-click='player.roll()'>Roll</button>
+
         </div>
 
         <script type="text/javascript">
         GameApplication.controller("GameController", ['$scope', '$http', '$timeout', function($scope, $http, $timeout )
         {
             $scope.game = new Game();
-            var player = $scope.game.addPlayer();
-            $scope.game.addPlayer();
-            $scope.game.addPlayer();
-            $scope.game.addPlayer();
-            player.developments.purchase("Quarrying");
-            player.developments.purchase("Agriculture");
-            player.developments.purchase("Coinage");
-            player.developments.purchase("Masonry");
-            player.cities.addWorkers(4);
-            player.disasters = 22;
-            player.debug();
+            $scope.player = $scope.game.addPlayer();
+            $scope.player.cities.addWorkers(4);
+            // $scope.player.roll();
+            $scope.player.developments.purchase("Quarrying");
+            $scope.player.developments.purchase("Agriculture");
+            $scope.player.developments.purchase("Coinage");
+            $scope.player.developments.purchase("Masonry");
+            $scope.player.cities.addWorkers(4);
+            $scope.player.goods.add(8);
+            $scope.player.disasters = 22;
+            $scope.player.debug();
         }]);
         </script>
 

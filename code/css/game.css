@@ -1,0 +1,28 @@
+body
+{
+    padding: 20px;
+}
+
+.dice
+{
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    border: 2px solid #cea65e;
+    padding: 3px;
+    display: inline-block;
+    cursor: pointer;
+    background-color: #f6daa9;
+}
+
+.dice.selected
+{
+    border: 2px solid #ba5e5e;
+    /*background-color: #fcc6bd;*/
+}
+
+.dice.reroll
+{
+    border: 2px solid #92ba5e;
+    /*background-color: #eeffd9;*/
+}
