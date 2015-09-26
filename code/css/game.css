@@ -28,7 +28,7 @@ body
 
 #myBoard>div
 {
-    padding: 10px;
+    padding: 5px;
 }
 
 #otherPlayers
@@ -76,5 +76,5 @@ body
 
 .dice.unset
 {
-    border: 2px solid #fa2525;
+    background-color: #f6eee1;
 }
