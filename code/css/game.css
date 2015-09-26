@@ -118,9 +118,10 @@ body
     text-align: center;
 }
 
-#myGoods .goods .good .cost.selected
+#myGoods .goods .good .cost.selected, #myFood .food .count.selected
 {
     color: #fff;
+    font-weight: bold;
 }
 
 #myGoods .goods .good.spearhead .cost.selected
@@ -156,5 +157,4 @@ body
 #myFood .food .count.selected
 {
     background-color: #338919;
-    color: #fff;
 }

@@ -40,7 +40,7 @@ class Player
 
     addFood(amountToAdd)
     {
-        this.food = Math.min( this.game.maxFood, (this.food + amountToAdd) );
+        this.food = Math.min( MAX_FOOD, (this.food + amountToAdd) );
     }
 
     feedCities()
