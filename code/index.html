@@ -1,0 +1,47 @@
+<!doctype html>
+<html ng-app="GameApplication">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.6/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+        <script type="text/javascript">
+        "use strict";
+        var GameApplication = angular.module('GameApplication', []);
+        </script>
+
+        <script src="js/helpers.js"></script>
+        <script src="js/classes/Goods.js"></script>
+        <script src="js/classes/Cities.js"></script>
+        <script src="js/classes/Monuments.js"></script>
+        <script src="js/classes/Developments.js"></script>
+        <script src="js/classes/Dice.js"></script>
+        <script src="js/classes/Player.js"></script>
+        <script src="js/classes/Game.js"></script>
+
+    </head>
+    <body>
+        <div ng-controller="GameController">
+        </div>
+
+        <script type="text/javascript">
+        GameApplication.controller("GameController", ['$scope', '$http', '$timeout', function($scope, $http, $timeout )
+        {
+            $scope.game = new Game();
+            var player = $scope.game.addPlayer();
+            $scope.game.addPlayer();
+            $scope.game.addPlayer();
+            $scope.game.addPlayer();
+            player.developments.purchase("Quarrying");
+            player.developments.purchase("Agriculture");
+            player.developments.purchase("Coinage");
+            player.developments.purchase("Masonry");
+            player.cities.addWorkers(4);
+            player.disasters = 22;
+            player.debug();
+        }]);
+        </script>
+
+    </body>
+</html>
