@@ -118,7 +118,7 @@
                         <div class='row'>
                             <div class='food col-xs-12'>
                                 <div class='type'>Food</div>
-                                <div class='count' ng-class="{'selected': $index == player.food}" ng-repeat='i in foodArray() track by $index'>{{$index}}</div>
+                                <div class='count' ng-class="{'selected': $index == player.food}" ng-repeat='i in toArray(game.maxFood()+1) track by $index'>{{$index}}</div>
                             </div>
                         </div>
                     </div>
@@ -127,7 +127,16 @@
                         <div class='row'>
                             <div class='cities col-xs-12'>
                                 <div class='type'>Cities</div>
-                                <div class='city' ng-class="{'completed': city.completed}" ng-repeat='city in player.cities.cities'>{{city.filledSpaces}} / {{city.totalSpaces}}</div>
+                                <div class='city' ng-class="{'completed': city.completed, 'progressing': (!city.completed && city.filledSpaces > 0)}" ng-repeat='city in player.cities.cities'>{{city.filledSpaces}} / {{city.totalSpaces}}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id='myFood' class='bg-danger'>
+                        <div class='row'>
+                            <div class='food col-xs-12' style='color: #a94442'>
+                                <div class='type'>Disasters</div>
+                                <div class='count'><strong>{{player.disasters}}<strong></div>
                             </div>
                         </div>
                     </div>
@@ -204,7 +213,7 @@
             $scope.player.developments.purchase("Graneries");
             $scope.player.goods.add(13);
             $scope.player.addFood(12);
-            $scope.player.disasters = 0;
+            $scope.player.disasters = 25;
             $scope.player.debug();
 
             $scope.toggleDice = function(diceIndex) 
@@ -229,8 +238,8 @@
                 }
             }
 
-            $scope.foodArray = function() {
-                return new Array($scope.game.maxFood()+1);   
+            $scope.toArray = function(amount) {
+                return new Array(amount);   
             }
         }]);
         </script>

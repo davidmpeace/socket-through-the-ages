@@ -108,7 +108,7 @@ body
     text-align: center;
 }
 
-#myGoods .goods .good .cost.selected, #myFood .food .count.selected, #myCities .cities .city.completed
+#myGoods .goods .good .cost.selected, #myFood .food .count.selected, .city.completed
 {
     color: #fff;
     font-weight: bold;
@@ -157,5 +157,11 @@ body
 #myCities .cities .city.completed
 {
     background-color: #2d8ab9;
+    font-weight: normal !important;
+}
+
+#myCities .cities .city.progressing
+{
+    background-color: #ffbb63;
     font-weight: normal !important;
 }
