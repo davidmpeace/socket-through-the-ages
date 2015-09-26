@@ -101,12 +101,14 @@
                                 <div class='cost'><strong>{{player.goods.value()}}</strong></div>
                             </div>
 
-                            <div class='good food'>
-                                <div class='type'>Food</div>
-                                <div class='cost' ng-class="{'selected': $index == player.food}" ng-repeat='i in foodArray() track by $index'>{{$index}}</div>
-                            </div>
                         </div>
+                    </div>
 
+                    <div id='myFood' class='row'>
+                        <div class='food col-xs-12'>
+                            <div class='type'>Food</div>
+                            <div class='count' ng-class="{'selected': $index == player.food}" ng-repeat='i in foodArray() track by $index'>{{$index}}</div>
+                        </div>
                     </div>
 
                 </div>
