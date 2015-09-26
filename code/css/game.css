@@ -39,6 +39,14 @@ body
     text-align: left;
 }
 
+.diceContainer 
+{
+    display: inline-block;
+    width: 60px;
+    margin: 3px;
+    text-align: center;
+}
+
 .dice
 {
     width: 60px;
@@ -46,14 +54,19 @@ body
     border-radius: 10px;
     border: 2px solid #cea65e;
     padding: 3px;
-    display: inline-block;
+    margin-bottom: 2px;
     background-color: #f6daa9;
-    margin: 3px;
+}
+
+.dice.skull
+{
+    background-color: #edafa8;
+    border: 2px solid #006cff;
 }
 
 .dice.keep
 {
-    border: 2px solid #fa2525;
+    border: 2px solid #006cff;
 }
 
 .dice.choice
@@ -63,6 +76,5 @@ body
 
 .dice.unset
 {
-    border: 4px solid #ff8a00;
-    padding: 1px;
+    border: 2px solid #fa2525;
 }

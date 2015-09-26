@@ -43,13 +43,16 @@
 
                         <div class='col-xs-9'>
                             <p ng-if='player.dice'><strong>Disaster Type:</strong>  {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})</p>
-                            <div class='dice' ng-repeat='dice in player.dice.dice track by $index' ng-class="{'keep': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice.charAt(0) == '2'), 'unset': (dice == '2_FOOD_OR_2_WORKERS')}">
-                                <img ng-src='img/{{dice}}.png' ng-click="toggleDice($index)" />
+                            <div ng-repeat='dice in player.dice.dice track by $index' class='diceContainer'>
+                                <div class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice.charAt(0) == '2'), 'unset': (dice == '2_FOOD_OR_2_WORKERS')}">
+                                    <img ng-src='img/{{dice}}.png' ng-click="toggleDice($index)" />
+                                </div>
+                                <button class='btn btn-primary btn-xs' ng-disabled="dice == '1_SKULL_AND_2_GOODS'">Keep</button>
                             </div>
                         </div>
 
                         <div class='col-xs-3'>
-                            <button class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
+                            <button ng-if="!player.dice || player.dice.rollsCompleted < player.dice.maxRolls() || player.dice.leadershipRoll()" class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
                         </div>
 
                     </div>
@@ -57,11 +60,11 @@
                     <div id="diceResults" class='row'>
 
                         <div class='col-xs-3'>
-                            Food: {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0"> - {{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
+                            Food: {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0">-{{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
                         </div>
 
                         <div class='col-xs-3'>
-                            Workers: {{player.dice.totalFixedWorkers()}}<span ng-if="player.dice.totalOptionalWorkers() > 0"> - {{player.dice.totalFixedWorkers() + player.dice.totalOptionalWorkers()}}</span>
+                            Workers: {{player.dice.totalFixedWorkers()}}<span ng-if="player.dice.totalOptionalWorkers() > 0">-{{player.dice.totalFixedWorkers() + player.dice.totalOptionalWorkers()}}</span>
                         </div>
 
                         <div class='col-xs-3'>

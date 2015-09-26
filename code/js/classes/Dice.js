@@ -47,10 +47,20 @@ class Dice
         ];
     }
 
+    maxRolls()
+    {
+        return MAX_ROLLS;
+    }
+
+    leadershipRoll()
+    {
+        return (this.rollsCompleted == this.maxRolls() && this.player.developments.has("Leadership"));
+    }
+
     roll( diceIndices )
     {
         var rollAll            = (typeof diceIndices == "undefined");
-        var lastLeadershipRoll = (this.rollsCompleted == MAX_ROLLS && this.player.developments.has("Leadership") && diceIndices.length == 1)
+        var lastLeadershipRoll = this.leadershipRoll() && (diceIndices.length == 1);
 
         if( this.rollsCompleted < MAX_ROLLS || lastLeadershipRoll ) {
             var rolledIndex;
