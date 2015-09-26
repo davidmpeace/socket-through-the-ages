@@ -54,29 +54,19 @@ class Dice
         return (this.rollsCompleted == MAX_ROLLS && this.player.developments.has("Leadership"));
     }
 
-    roll( diceIndices )
+    roll()
     {
-        var rollAll            = (typeof diceIndices == "undefined");
-        var lastLeadershipRoll = this.leadershipRoll() && (diceIndices.length == 1);
-
-        if( this.rollsCompleted < MAX_ROLLS || lastLeadershipRoll ) {
+        if( this.rollsCompleted < MAX_ROLLS ) {
             var rolledIndex;
             for( var i = 0; i < this.totalDie; i++ ) {
-
-                if( rollAll || (diceIndices.indexOf(i) > -1) ) {
-
-                    // Double check that we aren't re-rolling a scull, unless it's a last leadership roll
-                    if( lastLeadershipRoll || this.dice[i] != DICE_1_SKULL_AND_2_GOODS ) {
-                        rolledIndex = Math.floor(Math.random() * 6);
-                        this.dice[i] = this.diceSides[rolledIndex];
-                    }
+                if( this.diceToKeep.indexOf(i) == -1 && this.dice[i] != DICE_1_SKULL_AND_2_GOODS ) {
+                    rolledIndex = Math.floor(Math.random() * 6);
+                    this.dice[i] = this.diceSides[rolledIndex];
                 }
             }
             
             this.rollsCompleted++;
         }
-        console.log(this.dice);
-        this.debug();
     }
 
     hasOptionalDice()

@@ -67,12 +67,12 @@ body
 .dice.skull
 {
     background-color: #edafa8;
-    border: 2px solid #006cff;
+    border: 2px solid #f00;
 }
 
 .dice.keep
 {
-    border: 2px solid #006cff;
+    border: 2px solid #f00;
 }
 
 .dice.choice

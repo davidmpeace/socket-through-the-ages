@@ -70,7 +70,7 @@
                             <div id="myDice" class="row">
                                 <div class='col-xs-10' style='text-align:center'>
                                     <div ng-repeat='dice in player.dice.dice track by $index' class='diceContainer' style='vertical-align: top'>
-                                        <div class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice != '1_SKULL_AND_2_GOODS'), 'unset': (dice == '2_FOOD_OR_2_WORKERS')}">
+                                        <div ng-click="toggleKeep($index)" class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice != '1_SKULL_AND_2_GOODS'), 'unset': (dice == '2_FOOD_OR_2_WORKERS'), 'keep': (player.dice.diceToKeep.indexOf($index) > -1)}">
                                             <img ng-src='img/{{dice}}.png'  />
                                         </div>
                                         
@@ -216,6 +216,16 @@
                     $scope.player.dice.dice[diceIndex] = '2_WORKERS';
                 } else if( diceValue == '2_WORKERS' ) {
                     $scope.player.dice.dice[diceIndex] = '2_FOOD_OR_2_WORKERS';
+                }
+            }
+
+            $scope.toggleKeep = function(diceIndex)
+            {
+                var diceToKeepIndex = $scope.player.dice.diceToKeep.indexOf(diceIndex);
+                if( diceToKeepIndex > -1 ) {
+                    $scope.player.dice.diceToKeep.splice(diceToKeepIndex, 1);
+                } else {
+                    $scope.player.dice.diceToKeep.push(diceIndex);
                 }
             }
 
