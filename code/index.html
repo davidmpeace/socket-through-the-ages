@@ -41,73 +41,94 @@
                         
                     </div>
 
-                    <div id="myDice" class='row'>
 
-                        <div class='col-xs-9'>
-                            <div ng-repeat='dice in player.dice.dice track by $index' class='diceContainer'>
-                                <div class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice.charAt(0) == '2'), 'unset': (dice == '2_FOOD_OR_2_WORKERS')}">
-                                    <img ng-src='img/{{dice}}.png' ng-click="toggleDice($index)" />
+                    <div class="panel panel-info">
+
+                        <div class="panel-heading" ng-if='player.dice'>
+                            <div class='row'>
+                                
+                                <div class='col-xs-3'>
+                                    <strong>Food:</strong> {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0">-{{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
                                 </div>
-                                <div style='height: 20px'>
-                                    <button class='btn btn-primary btn-xs' ng-disabled="dice == '1_SKULL_AND_2_GOODS'" ng-hide="!(!player.dice || player.dice.rollsCompleted < game.maxRolls() || player.dice.leadershipRoll())">Keep</button>
+
+                                <div class='col-xs-3'>
+                                    <strong>Workers:</strong> {{player.dice.totalFixedWorkers()}}<span ng-if="player.dice.totalOptionalWorkers() > 0">-{{player.dice.totalFixedWorkers() + player.dice.totalOptionalWorkers()}}</span>
+                                </div>
+
+                                <div class='col-xs-3'>
+                                    <strong>Goods:</strong> {{player.dice.totalGoods()}}
+                                </div>
+
+                                <div class='col-xs-3'>
+                                    <strong>Coins:</strong> {{player.dice.totalCoins()}}
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="panel-body">
+                            <div id="myDice" class="row">
+                                <div class='col-xs-10' style='text-align:center'>
+                                    <div ng-repeat='dice in player.dice.dice track by $index' class='diceContainer' style='vertical-align: top'>
+                                        <div class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice != '1_SKULL_AND_2_GOODS'), 'unset': (dice == '2_FOOD_OR_2_WORKERS')}">
+                                            <img ng-src='img/{{dice}}.png'  />
+                                        </div>
+                                        
+                                        <button class='btn btn-primary btn-xs' ng-if="dice.charAt(0) == '2'" ng-click="toggleDice($index)">Change</button>
+                                    </div>
+                                </div>
+
+                                <div class='col-xs-2'>
+                                    <button ng-disabled="!(!player.dice || player.dice.rollsCompleted < game.maxRolls() || player.dice.leadershipRoll())" class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class='col-xs-3'>
-                            <button ng-disabled="!(!player.dice || player.dice.rollsCompleted < game.maxRolls() || player.dice.leadershipRoll())" class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
-                        </div>
-
-                    </div>
-
-                    <div id="diceResults" class='row bg-info' ng-if='player.dice'>
-
-                        <div class='col-xs-12'>
+                        <div class='panel-footer' style='background-color: #f2dede' ng-if="player.dice.disasterType() && player.dice.disasterType() != 'None'">
+                            
                             <strong>Disaster Type:</strong>  {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})
-                        </div>
-
-                        <div class='col-xs-3'>
-                            <strong>Food:</strong> {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0">-{{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
-                        </div>
-
-                        <div class='col-xs-3'>
-                            <strong>Workers:</strong> {{player.dice.totalFixedWorkers()}}<span ng-if="player.dice.totalOptionalWorkers() > 0">-{{player.dice.totalFixedWorkers() + player.dice.totalOptionalWorkers()}}</span>
-                        </div>
-
-                        <div class='col-xs-3'>
-                            <strong>Goods:</strong> {{player.dice.totalGoods()}}
-                        </div>
-
-                        <div class='col-xs-3'>
-                            <strong>Coins:</strong> {{player.dice.totalCoins()}}
+                            
                         </div>
 
                     </div>
 
-                    <div id="myGoods" class='row'>
+                    
 
-                        <div class='goods col-xs-12'>
-                            <div class='good' ng-class='{ {{goodType}}: true }' ng-repeat='goodType in player.goods.goodTypesReversed'>
-                                <div class='type'>{{goodType}}</div>
-                                <div class='cost' ng-class="{'selected': $index == player.goods.goods[goodType]}" ng-repeat='cost in player.goods.goodValues[goodType]'>{{cost}}</div>
-                            </div>
+                    <div id="myGoods" class='bg-warning'>
+                        <div class='row'>
+                            <div class='goods col-xs-12'>
+                                <div class='good' ng-class='{ {{goodType}}: true }' ng-repeat='goodType in player.goods.goodTypesReversed'>
+                                    <div class='type'>{{goodType}}</div>
+                                    <div class='cost' ng-class="{'selected': $index == player.goods.goods[goodType]}" ng-repeat='cost in player.goods.goodValues[goodType]'>{{cost}}</div>
+                                </div>
 
-                            <div class='good'>
-                                <div class='type'><strong>Total Goods</strong></div>
-                                <div class='cost'><strong>{{player.goods.total()}}</strong></div>
+                                <div class='good'>
+                                    <div class='type'><strong>Total Goods</strong></div>
+                                    <div class='cost'><strong>{{player.goods.total()}}</strong></div>
+                                </div>
+                                <div class='good'>
+                                    <div class='type'><strong>Goods Value</strong></div>
+                                    <div class='cost'><strong>{{player.goods.value()}}</strong></div>
+                                </div>
                             </div>
-                            <div class='good'>
-                                <div class='type'><strong>Goods Value</strong></div>
-                                <div class='cost'><strong>{{player.goods.value()}}</strong></div>
-                            </div>
-
                         </div>
                     </div>
 
-                    <div id='myFood' class='row'>
-                        <div class='food col-xs-12'>
-                            <div class='type'>Food</div>
-                            <div class='count' ng-class="{'selected': $index == player.food}" ng-repeat='i in foodArray() track by $index'>{{$index}}</div>
+                    <div id='myFood' class='bg-success'>
+                        <div class='row'>
+                            <div class='food col-xs-12'>
+                                <div class='type'>Food</div>
+                                <div class='count' ng-class="{'selected': $index == player.food}" ng-repeat='i in foodArray() track by $index'>{{$index}}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id='myCities' class='bg-info'>
+                        <div class='row'>
+                            <div class='cities col-xs-12'>
+                                <div class='type'>Cities</div>
+                                <div class='city' ng-class="{'completed': city.completed}" ng-repeat='city in player.cities.cities'>{{city.filledSpaces}} / {{city.totalSpaces}}</div>
+                            </div>
                         </div>
                     </div>
 
@@ -127,26 +148,26 @@
         {
             $scope.game = new Game();
             $scope.player = $scope.game.addPlayer();
-            $scope.player.cities.addWorkers(18);
-            $scope.player.monuments.addWorkersTo("Step Pyramid", 3);
-            $scope.player.monuments.addWorkersTo("Great Wall", 13);
-            $scope.player.monuments.addWorkersTo("Great Pyramid", 15);
-            $scope.player.monuments.addWorkersTo("Hanging Gardens", 11);
-            $scope.player.monuments.addWorkersTo("Temple", 7);
-            $scope.player.monuments.addWorkersTo("Stone Circle", 5);
-            // $scope.player.roll();
-            $scope.player.developments.purchase("Quarrying");
-            $scope.player.developments.purchase("Agriculture");
-            $scope.player.developments.purchase("Coinage");
-            $scope.player.developments.purchase("Masonry");
+            $scope.player.cities.addWorkers(5);
+            // $scope.player.monuments.addWorkersTo("Step Pyramid", 3);
+            // $scope.player.monuments.addWorkersTo("Great Wall", 13);
+            // $scope.player.monuments.addWorkersTo("Great Pyramid", 15);
+            // $scope.player.monuments.addWorkersTo("Hanging Gardens", 11);
+            // $scope.player.monuments.addWorkersTo("Temple", 7);
+            // $scope.player.monuments.addWorkersTo("Stone Circle", 5);
+            // // $scope.player.roll();
+            // $scope.player.developments.purchase("Quarrying");
+            // $scope.player.developments.purchase("Agriculture");
+            // $scope.player.developments.purchase("Coinage");
+            // $scope.player.developments.purchase("Masonry");
             $scope.player.developments.purchase("Irrigation");
-            $scope.player.developments.purchase("Empire");
-            $scope.player.developments.purchase("Architecture");
-            $scope.player.developments.purchase("Engineering");
-            $scope.player.developments.purchase("Graneries");
-            $scope.player.goods.add(13);
-            $scope.player.addFood(12);
-            $scope.player.disasters = 0;
+            // $scope.player.developments.purchase("Empire");
+            // $scope.player.developments.purchase("Architecture");
+            // $scope.player.developments.purchase("Engineering");
+            // $scope.player.developments.purchase("Graneries");
+            // $scope.player.goods.add(13);
+            // $scope.player.addFood(12);
+            // $scope.player.disasters = 0;
             $scope.player.debug();
 
             $scope.toggleDice = function(diceIndex) 

@@ -18,17 +18,17 @@ body
     background-color: #fff;
 }
 
+#gameHeader
+{
+    margin-bottom: 15px;
+}
+
 #myBoard
 {
     width: 700px;
     display: inline-block;
     vertical-align: top;
     text-align: left;
-}
-
-#myBoard>div
-{
-    padding: 5px;
 }
 
 #otherPlayers
@@ -85,32 +85,22 @@ body
     background-color: #f6eee1;
 }
 
-#myGoods
-{
-    background-color: #f4dec1;
-}
-
-#myFood
-{
-    background-color: #b3e4a2;
-}
-
-#myGoods .goods .good, #myFood .food
+.good, .food, .cities
 {
     height: 14px;
     font-size: 12px;
     line-height: 14px;
-    margin-bottom: 2px;
 }
 
-#myGoods .goods .good .type, #myFood .type
+.type
 {
     text-transform: capitalize;
+    font-weight: bold;
     display: inline-block;
     width: 100px;
 }
 
-#myGoods .goods .good .cost, #myFood .count
+#myGoods .goods .good .cost, #myFood .count, .city
 {
     display: inline-block;
     width: 30px;
@@ -118,7 +108,7 @@ body
     text-align: center;
 }
 
-#myGoods .goods .good .cost.selected, #myFood .food .count.selected
+#myGoods .goods .good .cost.selected, #myFood .food .count.selected, #myCities .cities .city.completed
 {
     color: #fff;
     font-weight: bold;
@@ -157,4 +147,15 @@ body
 #myFood .food .count.selected
 {
     background-color: #338919;
+}
+
+.good, .food, .cities
+{
+    margin: 8px;
+}
+
+#myCities .cities .city.completed
+{
+    background-color: #2d8ab9;
+    font-weight: normal !important;
 }
