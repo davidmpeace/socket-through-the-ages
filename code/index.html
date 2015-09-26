@@ -142,7 +142,7 @@
                             <th style='padding: 2px'>Points</th>
                             <th style='padding: 2px'>Effect</th>
                         </tr>
-                        <tr ng-repeat="development in player.developments.developments">
+                        <tr ng-repeat="development in player.developments.developments" ng-class='{success: development.purchased}'>
                             <td style='padding: 2px'>{{development.cost}}</td>
                             <td style='padding: 2px'>{{development.purchased}}</td>
                             <td style='padding: 2px'>{{development.name}}</td>
@@ -160,7 +160,7 @@
                             <th style='padding: 2px'>Spaces</th>
                             <th style='padding: 2px'>Points</th>
                         </tr>
-                        <tr ng-repeat="monument in player.monuments.monuments">
+                        <tr ng-repeat="monument in player.monuments.monuments" ng-class='{success: monument.completed, warning: !monument.completed && monument.filledSpaces > 0}'>
                             <td style='padding: 2px'>{{monument.name}}</td>
                             <td style='padding: 2px'>{{monument.completed}}</td>
                             <td style='padding: 2px'>{{monument.filledSpaces}} / {{monument.totalSpaces}}</td>
@@ -186,8 +186,8 @@
             $scope.player.cities.addWorkers(5);
             $scope.player.monuments.addWorkersTo("Step Pyramid", 3);
             $scope.player.monuments.addWorkersTo("Great Wall", 13);
-            $scope.player.monuments.addWorkersTo("Great Pyramid", 15);
-            $scope.player.monuments.addWorkersTo("Hanging Gardens", 11);
+            $scope.player.monuments.addWorkersTo("Great Pyramid", 5);
+            $scope.player.monuments.addWorkersTo("Hanging Gardens", 5);
             $scope.player.monuments.addWorkersTo("Temple", 7);
             $scope.player.monuments.addWorkersTo("Stone Circle", 5);
             // $scope.player.roll();
