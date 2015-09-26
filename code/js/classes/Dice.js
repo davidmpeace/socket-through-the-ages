@@ -13,6 +13,15 @@ var DISASTER_TYPE_PESTILENCE = "Pestilence";
 var DISASTER_TYPE_INVASION   = "Invasion";
 var DISASTER_TYPE_REVOLT     = "Revolt";
 
+var DISASTER_EFFECT_NONE                     = "No Effect";
+var DISASTER_EFFECT_DROUGHT                  = "+2 Disasters";
+var DISASTER_EFFECT_DROUGHT_WITH_IRRIGATION  = "Protected by Irrigation";
+var DISASTER_EFFECT_PESTILENCE               = "Opponents +3 Disasters";
+var DISASTER_EFFECT_INVASION                 = "+4 Disasters";
+var DISASTER_EFFECT_INVASION_WITH_GREAT_WALL = "Protected by Great Wall";
+var DISASTER_EFFECT_REVOLT                   = "Lose all Goods";
+var DISASTER_EFFECT_REVOLT_WITH_RELIGION     = "Opponents Lose all Goods";
+
 class Dice
 {
     constructor(game, player)
@@ -156,6 +165,23 @@ class Dice
             return DISASTER_TYPE_REVOLT;
         }
         return DISASTER_TYPE_NONE;
+    }
+
+    disasterEffect()
+    {
+        var disasterType = this.disasterType();
+
+        if( disasterType == DISASTER_TYPE_DROUGHT ) {
+            return (this.player.developments.has("Irrigation")) ? DISASTER_EFFECT_DROUGHT_WITH_IRRIGATION : DISASTER_EFFECT_DROUGHT;
+        } else if( disasterType == DISASTER_TYPE_PESTILENCE ) {
+            return DISASTER_EFFECT_PESTILENCE;
+        } else if( disasterType == DISASTER_TYPE_INVASION) {
+            return (this.player.monuments.completed("Great Wall")) ? DISASTER_EFFECT_INVASION_WITH_GREAT_WALL : DISASTER_EFFECT_INVASION;
+        } else if( disasterType == DISASTER_TYPE_REVOLT ) {
+            return (this.player.developments.has("Religion")) ? DISASTER_EFFECT_REVOLT_WITH_RELIGION : DISASTER_EFFECT_REVOLT;
+        }
+
+        return DISASTER_EFFECT_NONE;
     }
 
     debug()

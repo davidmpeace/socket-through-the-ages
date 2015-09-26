@@ -23,14 +23,44 @@
 
     </head>
     <body>
-        <div ng-controller="GameController" ng-cloak>
+        <div id='myGame' ng-controller="GameController" ng-cloak>
 
-            <p ng-if='player.dice'><strong>Disaster Type:</strong> {{player.dice.disasterType()}}</p>
-            <div class='dice' ng-repeat='dice in player.dice.dice track by $index' ng-class="{'frozen': (dice == '2_GOODS_AND_1_SKULL')}">
-                <img ng-src='img/{{dice}}.png' />
+            <div id="wrapper">
+                <div id="myBoard" class="container-fluid">
+
+                    <div id="gameHeader" class='row'>
+                        
+                        <div class='col-xs-4'>
+                            <h4>Socket Ages</h4>
+                        </div>
+                        <div class='col-xs-8'>
+                            <input type="text" class="form-control" placeholder="Name" ng-model="player.playerName" />
+                        </div>
+                        
+                    </div>
+
+                    <div id="myDice" class='row'>
+
+                        <div class='col-xs-9'>
+                            <p ng-if='player.dice'><strong>Disaster Type:</strong> {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})</p>
+                            <div class='dice' ng-repeat='dice in player.dice.dice track by $index' ng-class="{'frozen': (dice == '2_GOODS_AND_1_SKULL')}">
+                                <img ng-src='img/{{dice}}.png' />
+                            </div>
+                        </div>
+
+                        <div class='col-xs-3'>
+                            <button class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div id="otherPlayers" class=''>
+
+                </div>
             </div>
-
-            <button class='btn btn-primary' ng-click='player.roll()'>Roll</button>
+        
 
         </div>
 
@@ -45,6 +75,7 @@
             $scope.player.developments.purchase("Agriculture");
             $scope.player.developments.purchase("Coinage");
             $scope.player.developments.purchase("Masonry");
+            $scope.player.developments.purchase("Irrigation");
             $scope.player.goods.add(8);
             $scope.player.disasters = 22;
             $scope.player.debug();

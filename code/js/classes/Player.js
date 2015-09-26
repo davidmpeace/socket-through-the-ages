@@ -57,33 +57,27 @@ class Player
 
     resolveDisasters()
     {
-        var disasterType = this.dice.disasterType();
+        var disasterEffect = this.dice.disasterEffect();
 
-        if( disasterType == DISASTER_TYPE_NONE ) {
-            return;
-        }
-
-        if( disasterType == DISASTER_TYPE_DROUGHT && !this.developments.has("Irrigation") ) {
+        if( disasterEffect == DISASTER_EFFECT_DROUGHT ) {
             this.disasters += 2;
-        } else if( disasterType == DISASTER_TYPE_PESTILENCE ) {
+        } else if( disasterEffect == DISASTER_EFFECT_PESTILENCE ) {
             for( var p in this.game.players ) {
                 var otherPlayer = this.game.players[p];
                 if( otherPlayer.playerName != this.playerName && !otherPlayer.developments.has("Medicine") ) {
                     otherPlayer.disasters += 3;
                 }
             }
-        } else if( disasterType == DISASTER_TYPE_INVASION && !this.monuments.completed("Great Wall") ) {
+        } else if( disasterEffect == DISASTER_EFFECT_INVASION ) {
             this.disasters += 4;
-        } else if( disasterType == DISASTER_TYPE_REVOLT ) {
-            if( this.developments.has("Religion") ) {
-                for( var p in this.game.players ) {
-                    var otherPlayer = this.game.players[p];
-                    if( otherPlayer.playerName != this.playerName ) {
-                        otherPlayer.goods.reset();
-                    }
+        } else if( disasterEffect == DISASTER_EFFECT_REVOLT ) {
+            this.goods.reset();
+        } else if( disasterEffect == DISASTER_EFFECT_REVOLT_WITH_RELIGION ) {
+            for( var p in this.game.players ) {
+                var otherPlayer = this.game.players[p];
+                if( otherPlayer.playerName != this.playerName ) {
+                    otherPlayer.goods.reset();
                 }
-            } else {
-                this.goods.reset();
             }
         }
     }

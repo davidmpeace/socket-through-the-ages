@@ -1,6 +1,42 @@
 body
 {
+    background-color: #ccc;
+}
+
+#myGame
+{
     padding: 20px;
+    text-align: center;
+}
+
+#wrapper
+{
+    width: 1120px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+    background-color: #fff;
+}
+
+#myBoard
+{
+    width: 700px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+}
+
+#myBoard>div
+{
+    padding: 10px;
+}
+
+#otherPlayers
+{
+    width: 400px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
 }
 
 .dice
