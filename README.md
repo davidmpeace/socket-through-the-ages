@@ -12,7 +12,7 @@ player1.developments.purchase("Coinage");
 player1.developments.purchase("Masonry");
 player1.cities.addWorkers(4);
 player1.monuments.addWorkersTo("Great Wall", 4);
-player1.goods.add(13);
+player1.goods.add(8);
 player1.roll();
 player1.dice.debug();
 player1.roll();
