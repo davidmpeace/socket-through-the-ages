@@ -47,14 +47,9 @@ class Dice
         ];
     }
 
-    maxRolls()
-    {
-        return MAX_ROLLS;
-    }
-
     leadershipRoll()
     {
-        return (this.rollsCompleted == this.maxRolls() && this.player.developments.has("Leadership"));
+        return (this.rollsCompleted == MAX_ROLLS && this.player.developments.has("Leadership"));
     }
 
     roll( diceIndices )

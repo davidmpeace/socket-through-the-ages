@@ -4,6 +4,7 @@ var MAX_PLAYERS      = 4;
 var MAX_FOOD         = 15;
 var MAX_DEVELOPMENTS = 5;
 var MAX_ROLLS        = 3;
+var MAX_GOODS        = 6;
 
 class Game
 {
@@ -28,5 +29,30 @@ class Game
             this.players.push( player );
             return player;
         }
+    }
+
+    maxFood()
+    {
+        return MAX_FOOD;
+    }
+
+    maxDevelopments() 
+    {
+        return MAX_DEVELOPMENTS;
+    }
+
+    maxRolls()
+    {
+        return MAX_ROLLS;
+    }
+
+    maxPlayers()
+    {
+        return MAX_PLAYERS;
+    }
+
+    maxGoods()
+    {
+        return MAX_GOODS;
     }
 }

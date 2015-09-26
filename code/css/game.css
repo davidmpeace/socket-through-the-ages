@@ -141,3 +141,13 @@ body
 {
     background-color: #462f3a;
 }
+
+#myGoods .goods .good.food
+{
+    margin-top: 15px;
+}
+
+#myGoods .goods .good.food .cost.selected
+{
+    background-color: #338919;
+}

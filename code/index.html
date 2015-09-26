@@ -49,13 +49,13 @@
                                     <img ng-src='img/{{dice}}.png' ng-click="toggleDice($index)" />
                                 </div>
                                 <div style='height: 20px'>
-                                    <button class='btn btn-primary btn-xs' ng-disabled="dice == '1_SKULL_AND_2_GOODS'" ng-hide="!(!player.dice || player.dice.rollsCompleted < player.dice.maxRolls() || player.dice.leadershipRoll())">Keep</button>
+                                    <button class='btn btn-primary btn-xs' ng-disabled="dice == '1_SKULL_AND_2_GOODS'" ng-hide="!(!player.dice || player.dice.rollsCompleted < game.maxRolls() || player.dice.leadershipRoll())">Keep</button>
                                 </div>
                             </div>
                         </div>
 
                         <div class='col-xs-3'>
-                            <button ng-disabled="!(!player.dice || player.dice.rollsCompleted < player.dice.maxRolls() || player.dice.leadershipRoll())" class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
+                            <button ng-disabled="!(!player.dice || player.dice.rollsCompleted < game.maxRolls() || player.dice.leadershipRoll())" class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
                         </div>
 
                     </div>
@@ -95,8 +95,17 @@
                             </div>
 
                             <div class='good'>
+                                <div class='type'><strong>Total Goods</strong></div>
+                                <div class='cost'><strong>{{player.goods.total()}}</strong></div>
+                            </div>
+                            <div class='good'>
                                 <div class='type'><strong>Goods Value</strong></div>
                                 <div class='cost'><strong>{{player.goods.value()}}</strong></div>
+                            </div>
+
+                            <div class='good food'>
+                                <div class='type'>Food</div>
+                                <div class='cost' ng-class="{'selected': $index == player.food}" ng-repeat='i in foodArray() track by $index'>{{$index}}</div>
                             </div>
                         </div>
 
@@ -120,13 +129,21 @@
             $scope.player.cities.addWorkers(18);
             $scope.player.monuments.addWorkersTo("Step Pyramid", 3);
             $scope.player.monuments.addWorkersTo("Great Wall", 13);
+            $scope.player.monuments.addWorkersTo("Great Pyramid", 15);
+            $scope.player.monuments.addWorkersTo("Hanging Gardens", 11);
+            $scope.player.monuments.addWorkersTo("Temple", 7);
+            $scope.player.monuments.addWorkersTo("Stone Circle", 5);
             // $scope.player.roll();
             $scope.player.developments.purchase("Quarrying");
-            // $scope.player.developments.purchase("Agriculture");
-            // $scope.player.developments.purchase("Coinage");
-            // $scope.player.developments.purchase("Masonry");
-            // $scope.player.developments.purchase("Irrigation");
-            $scope.player.goods.add(8);
+            $scope.player.developments.purchase("Agriculture");
+            $scope.player.developments.purchase("Coinage");
+            $scope.player.developments.purchase("Masonry");
+            $scope.player.developments.purchase("Irrigation");
+            $scope.player.developments.purchase("Empire");
+            $scope.player.developments.purchase("Architecture");
+            $scope.player.developments.purchase("Engineering");
+            $scope.player.developments.purchase("Graneries");
+            $scope.player.goods.add(13);
             $scope.player.disasters = 0;
             $scope.player.debug();
 
@@ -140,6 +157,10 @@
                 } else if( diceValue == '2_WORKERS' ) {
                     $scope.player.dice.dice[diceIndex] = '2_FOOD_OR_2_WORKERS';
                 }
+            }
+
+            $scope.foodArray = function() {
+                return new Array($scope.game.maxFood());   
             }
         }]);
         </script>
