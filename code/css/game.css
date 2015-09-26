@@ -39,6 +39,12 @@ body
     text-align: left;
 }
 
+#diceResults
+{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .diceContainer 
 {
     display: inline-block;

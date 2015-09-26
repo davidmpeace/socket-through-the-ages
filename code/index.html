@@ -60,13 +60,11 @@
 
                     </div>
 
-                    <div class='row' ng-if='player.dice'>
+                    <div id="diceResults" class='row bg-info' ng-if='player.dice'>
+
                         <div class='col-xs-12'>
                             <strong>Disaster Type:</strong>  {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})
                         </div>
-                    </div>
-
-                    <div id="diceResults" class='row' ng-if='player.dice'>
 
                         <div class='col-xs-3'>
                             <strong>Food:</strong> {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0">-{{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
