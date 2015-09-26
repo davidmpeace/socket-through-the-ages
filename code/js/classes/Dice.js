@@ -1,11 +1,17 @@
 "use strict";
 
-var DICE_3_FOOD              = '3_FOOD';
-var DICE_3_WORKERS           = '3_WORKERS';
-var DICE_2_FOOD_OR_2_WORKERS = '2_FOOD_OR_2_WORKERS';
-var DICE_1_GOOD              = '1_GOOD';
-var DICE_2_GOODS_AND_1_SKULL = '2_GOODS_AND_1_SKULL';
-var DICE_COINS               = 'COINS';
+var DICE_3_FOOD              = "3_FOOD";
+var DICE_3_WORKERS           = "3_WORKERS";
+var DICE_2_FOOD_OR_2_WORKERS = "2_FOOD_OR_2_WORKERS";
+var DICE_1_GOOD              = "1_GOOD";
+var DICE_2_GOODS_AND_1_SKULL = "2_GOODS_AND_1_SKULL";
+var DICE_COINS               = "COINS";
+
+var DISASTER_TYPE_NONE       = "None";
+var DISASTER_TYPE_DROUGHT    = "Drought";
+var DISASTER_TYPE_PESTILENCE = "Pestilence";
+var DISASTER_TYPE_INVASION   = "Invasion";
+var DISASTER_TYPE_REVOLT     = "Revolt";
 
 class Dice
 {
@@ -136,6 +142,20 @@ class Dice
     totalSkulls()
     {
         return this.total('SKULLS');
+    }
+
+    disasterType()
+    {
+        if( this.totalSkulls() == 2 ) {
+            return DISASTER_TYPE_DROUGHT;
+        } else if( this.totalSkulls() == 3 ) {
+            return DISASTER_TYPE_PESTILENCE;
+        } else if( this.totalSkulls() == 4 ) {
+            return DISASTER_TYPE_INVASION;
+        } else if( this.totalSkulls() >= 5 ) {
+            return DISASTER_TYPE_REVOLT;
+        }
+        return DISASTER_TYPE_NONE;
     }
 
     debug()

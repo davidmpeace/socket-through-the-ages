@@ -57,22 +57,28 @@ class Player
 
     resolveDisasters()
     {
-        if( this.dice.totalSkulls() == 2 && !this.developments.has("Irrigation") ) {
+        var disasterType = this.dice.disasterType();
+
+        if( disasterType == DISASTER_TYPE_NONE ) {
+            return;
+        }
+
+        if( disasterType == DISASTER_TYPE_DROUGHT && !this.developments.has("Irrigation") ) {
             this.disasters += 2;
-        } else if( this.dice.totalSkulls() == 3 ) {
+        } else if( disasterType == DISASTER_TYPE_PESTILENCE ) {
             for( var p in this.game.players ) {
                 var otherPlayer = this.game.players[p];
                 if( otherPlayer.playerName != this.playerName && !otherPlayer.developments.has("Medicine") ) {
                     otherPlayer.disasters += 3;
                 }
             }
-        } else if( this.dice.totalSkulls() == 4 && !this.monuments.completed("Great Wall") ) {
+        } else if( disasterType == DISASTER_TYPE_INVASION && !this.monuments.completed("Great Wall") ) {
             this.disasters += 4;
-        } else if( this.dice.totalSkulls() >= 5 ) {
+        } else if( disasterType == DISASTER_TYPE_REVOLT ) {
             if( this.developments.has("Religion") ) {
                 for( var p in this.game.players ) {
                     var otherPlayer = this.game.players[p];
-                    if( otherPlayer.playerName != this.playerName && !otherPlayer.developments.has("Medicine") ) {
+                    if( otherPlayer.playerName != this.playerName ) {
                         otherPlayer.goods.reset();
                     }
                 }

@@ -25,6 +25,7 @@
     <body>
         <div ng-controller="GameController" ng-cloak>
 
+            <p ng-if='player.dice'><strong>Disaster Type:</strong> {{player.dice.disasterType()}}</p>
             <div class='dice' ng-repeat='dice in player.dice.dice track by $index' ng-class="{'frozen': (dice == '2_GOODS_AND_1_SKULL')}">
                 <img ng-src='img/{{dice}}.png' />
             </div>
