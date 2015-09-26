@@ -42,14 +42,34 @@
                     <div id="myDice" class='row'>
 
                         <div class='col-xs-9'>
-                            <p ng-if='player.dice'><strong>Disaster Type:</strong> {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})</p>
-                            <div class='dice' ng-repeat='dice in player.dice.dice track by $index' ng-class="{'frozen': (dice == '2_GOODS_AND_1_SKULL')}">
-                                <img ng-src='img/{{dice}}.png' />
+                            <p ng-if='player.dice'><strong>Disaster Type:</strong>  {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})</p>
+                            <div class='dice' ng-repeat='dice in player.dice.dice track by $index' ng-class="{'keep': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice.charAt(0) == '2'), 'unset': (dice == '2_FOOD_OR_2_WORKERS')}">
+                                <img ng-src='img/{{dice}}.png' ng-click="toggleDice($index)" />
                             </div>
                         </div>
 
                         <div class='col-xs-3'>
                             <button class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
+                        </div>
+
+                    </div>
+
+                    <div id="diceResults" class='row'>
+
+                        <div class='col-xs-3'>
+                            Food: {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0"> - {{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
+                        </div>
+
+                        <div class='col-xs-3'>
+                            Workers: {{player.dice.totalFixedWorkers()}}<span ng-if="player.dice.totalOptionalWorkers() > 0"> - {{player.dice.totalFixedWorkers() + player.dice.totalOptionalWorkers()}}</span>
+                        </div>
+
+                        <div class='col-xs-3'>
+                            Goods: {{player.dice.totalGoods()}}
+                        </div>
+
+                        <div class='col-xs-3'>
+                            Coins: {{player.dice.totalCoins()}}
                         </div>
 
                     </div>
@@ -79,6 +99,18 @@
             $scope.player.goods.add(8);
             $scope.player.disasters = 22;
             $scope.player.debug();
+
+            $scope.toggleDice = function(diceIndex) 
+            {
+                var diceValue = $scope.player.dice.dice[diceIndex];
+                if( diceValue == '2_FOOD_OR_2_WORKERS' ) {
+                    $scope.player.dice.dice[diceIndex] = '2_FOOD';
+                } else if( diceValue == '2_FOOD' ) {
+                    $scope.player.dice.dice[diceIndex] = '2_WORKERS';
+                } else if( diceValue == '2_WORKERS' ) {
+                    $scope.player.dice.dice[diceIndex] = '2_FOOD_OR_2_WORKERS';
+                }
+            }
         }]);
         </script>
 

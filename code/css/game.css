@@ -47,19 +47,22 @@ body
     border: 2px solid #cea65e;
     padding: 3px;
     display: inline-block;
-    cursor: pointer;
     background-color: #f6daa9;
     margin: 3px;
 }
 
-.dice.frozen
+.dice.keep
 {
     border: 2px solid #fa2525;
-    /*background-color: #fcc6bd;*/
 }
 
-.dice.reroll
+.dice.choice
 {
-    border: 2px solid #92ba5e;
-    /*background-color: #eeffd9;*/
+    cursor: pointer;
+}
+
+.dice.unset
+{
+    border: 4px solid #ff8a00;
+    padding: 1px;
 }

@@ -3,8 +3,10 @@
 var DICE_3_FOOD              = "3_FOOD";
 var DICE_3_WORKERS           = "3_WORKERS";
 var DICE_2_FOOD_OR_2_WORKERS = "2_FOOD_OR_2_WORKERS";
+var DICE_2_FOOD              = "2_FOOD";
+var DICE_2_WORKERS           = "2_WORKERS";
 var DICE_1_GOOD              = "1_GOOD";
-var DICE_2_GOODS_AND_1_SKULL = "2_GOODS_AND_1_SKULL";
+var DICE_1_SKULL_AND_2_GOODS = "1_SKULL_AND_2_GOODS";
 var DICE_COINS               = "COINS";
 
 var DISASTER_TYPE_NONE       = "None";
@@ -41,7 +43,7 @@ class Dice
             DICE_1_GOOD,
             DICE_2_FOOD_OR_2_WORKERS,
             DICE_COINS,
-            DICE_2_GOODS_AND_1_SKULL
+            DICE_1_SKULL_AND_2_GOODS
         ];
     }
 
@@ -57,7 +59,7 @@ class Dice
                 if( rollAll || (diceIndices.indexOf(i) > -1) ) {
 
                     // Double check that we aren't re-rolling a scull, unless it's a last leadership roll
-                    if( lastLeadershipRoll || this.dice[i] != DICE_2_GOODS_AND_1_SKULL ) {
+                    if( lastLeadershipRoll || this.dice[i] != DICE_1_SKULL_AND_2_GOODS ) {
                         rolledIndex = Math.floor(Math.random() * 6);
                         this.dice[i] = this.diceSides[rolledIndex];
                     }
@@ -93,11 +95,11 @@ class Dice
                         }
                     }
                 } else if( type == 'GOODS') {
-                    if( die == DICE_1_GOOD || die == DICE_2_GOODS_AND_1_SKULL ) {
+                    if( die == DICE_1_GOOD || die == DICE_1_SKULL_AND_2_GOODS ) {
                         if( this.total("SKULLS") >= 5 && !this.player.developments.has("Religion") ) {
                             total = 0;
                         } else {
-                            total += (die == DICE_2_GOODS_AND_1_SKULL) ? 2 : 1;
+                            total += (die == DICE_1_SKULL_AND_2_GOODS) ? 2 : 1;
                         }
                     }
                 } else if( type == 'COINS') {
@@ -109,7 +111,7 @@ class Dice
                         }
                     }
                 } else if( type == 'SKULLS') {
-                    if( die == DICE_2_GOODS_AND_1_SKULL ) {
+                    if( die == DICE_1_SKULL_AND_2_GOODS ) {
                         total += 1;
                     }
                 }
