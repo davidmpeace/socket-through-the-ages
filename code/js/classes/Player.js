@@ -20,8 +20,17 @@ class Player
         this.disasters    = 0;
     }
 
+    myTurn()
+    {
+        return (this.game.currentPlayer().playerName == this.playerName);
+    }
+
     roll( diceIndices )
     {
+        if( !this.myTurn() ) {
+            return; // It's not my turn
+        }
+
         this.rolling = true;
         if( !this.dice ) {
             this.dice = new Dice(this.game, this);
@@ -31,20 +40,30 @@ class Player
 
     doneRolling()
     {
+        if( !this.myTurn() ) {
+            return; // It's not my turn
+        }
+
         this.rolling = false;
         this.addFood(this.dice.totalFixedFood());
         this.goods.add(this.dice.totalGoods());
-
-
     }
 
     addFood(amountToAdd)
     {
+        if( !this.myTurn() ) {
+            return; // It's not my turn
+        }
+
         this.food = Math.min( MAX_FOOD, (this.food + amountToAdd) );
     }
 
     feedCities()
     {
+        if( !this.myTurn() ) {
+            return; // It's not my turn
+        }
+
         var remainingFood = this.food - this.cities.totalCompleted();
         this.food = Math.max( 0, remainingFood );
         var famines = 0;
@@ -57,6 +76,10 @@ class Player
 
     resolveDisasters()
     {
+        if( !this.myTurn() ) {
+            return; // It's not my turn
+        }
+
         var disasterEffect = this.dice.disasterEffect();
 
         if( disasterEffect == DISASTER_EFFECT_DROUGHT ) {

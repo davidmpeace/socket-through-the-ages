@@ -28,161 +28,212 @@
             <div id="wrapper">
                 <div id="myBoard" class="container-fluid">
 
-                    <div id="gameHeader" class='row'>
-                        
-                        <div class='col-xs-6'>
-                            <h4>Socket Through the Ages</h4>
-                        </div>
-                        <div class='col-xs-6'>
-                            <input type="text" class="form-control" placeholder="Name" ng-model="player.playerName" />
-
-                            Total Points: {{player.totalPoints()}}
-                        </div>
-                        
-                    </div>
-
-
-                    <div class="panel panel-info">
-
-                        <div class="panel-heading" ng-if='player.dice'>
-                            <div class='row'>
-                                
-                                <div class='col-xs-3'>
-                                    <strong>Food:</strong> {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0">-{{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
-                                </div>
-
-                                <div class='col-xs-3'>
-                                    <strong>Workers:</strong> {{player.dice.totalFixedWorkers()}}<span ng-if="player.dice.totalOptionalWorkers() > 0">-{{player.dice.totalFixedWorkers() + player.dice.totalOptionalWorkers()}}</span>
-                                </div>
-
-                                <div class='col-xs-3'>
-                                    <strong>Goods:</strong> {{player.dice.totalGoods()}}
-                                </div>
-
-                                <div class='col-xs-3'>
-                                    <strong>Coins:</strong> {{player.dice.totalCoins()}}
-                                </div>
-
+                    
+                    <div id="gameHeader">
+                        <div class='row'>
+                            <div class='col-xs-12'>
+                                <h4>Socket Through the Ages</h4>
                             </div>
                         </div>
+                        <div class='row' ng-show='game.started'>
+                            <div class='col-xs-6'>
+                                Me: {{me.playerName}}
+                            </div>
+                            <div class='col-xs-6'>
+                                Total Points: {{me.totalPoints()}}
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="panel-body">
-                            <div id="myDice" class="row">
-                                <div class='col-xs-10' style='text-align:center'>
-                                    <div ng-repeat='dice in player.dice.dice track by $index' class='diceContainer' style='vertical-align: top'>
-                                        <div ng-click="toggleKeep($index)" class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice != '1_SKULL_AND_2_GOODS'), 'unset': (dice == '2_FOOD_OR_2_WORKERS'), 'keep': (player.dice.diceToKeep.indexOf($index) > -1)}">
-                                            <img ng-src='img/{{dice}}.png'  />
+                    <div class='row' id='newGame' ng-hide='game.started'>
+                        <div class='col-xs-12'>
+                            <h4>New Game</h4>
+                            <p>Welcome to Socket Through the Ages.</p>
+                            <p>Let's get started, why don't you add some players, or just play with yourself!</p>
+                            
+                            <table>
+                                <tr>
+                                    <th>Player Name</th>
+                                    <th></th>
+                                </tr>
+                                <tr ng-repeat='player in game.players'>
+                                    <td>
+                                        <input type="text" class="form-control" placeholder="Name" ng-model="player.playerName" />
+                                    </td>
+                                    <td>
+                                        <a href='javascript:void(0)' ng-if="$index > 0" ng-click='removePlayer($index)'><span class='glyphicon glyphicon-trash'></span></a>
+                                        <span ng-if="$index == 0">&lt;-- This is you!</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button class='btn btn-primary' ng-click='addPlayer()'>Add Player</button></td>
+                                    </td>
+                                    <td>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <br/>
+                            <br/>
+                            <button class='btn btn-info btn-lg' ng-click='startGame()'>RANDOMLY CHOOSE TURN ORDER &amp; START THE GAME</button>
+                            <br/>
+                            <br/>
+
+                        </div>
+                    </div>
+
+                    <div ng-show='game.started'>
+
+                        <ul class="nav nav-tabs">
+                            <li role="presentation" ng-class="{active: $index == showingPlayerIndex}" ng-repeat='player in game.players'>
+                                <a href="javascript:void(0)" ng-click="showPlayer($index)">{{player.playerName}}</a>
+                            </li>
+                        </ul>
+                        <br/>
+
+                        <div class="panel panel-info">
+
+                            <div class="panel-heading" ng-if='player.dice'>
+                                <div class='row'>
+                                    
+                                    <div class='col-xs-3'>
+                                        <strong>Food:</strong> {{player.dice.totalFixedFood()}}<span ng-if="player.dice.totalOptionalFood() > 0">-{{player.dice.totalFixedFood() + player.dice.totalOptionalFood()}}</span>
+                                    </div>
+
+                                    <div class='col-xs-3'>
+                                        <strong>Workers:</strong> {{player.dice.totalFixedWorkers()}}<span ng-if="player.dice.totalOptionalWorkers() > 0">-{{player.dice.totalFixedWorkers() + player.dice.totalOptionalWorkers()}}</span>
+                                    </div>
+
+                                    <div class='col-xs-3'>
+                                        <strong>Goods:</strong> {{player.dice.totalGoods()}}
+                                    </div>
+
+                                    <div class='col-xs-3'>
+                                        <strong>Coins:</strong> {{player.dice.totalCoins()}}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="panel-body">
+                                <div id="myDice" class="row">
+                                    <div class='col-xs-10' style='text-align:center'>
+                                        <div ng-repeat='dice in player.dice.dice track by $index' class='diceContainer' style='vertical-align: top'>
+                                            <div ng-click="toggleKeep($index)" class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': (dice != '1_SKULL_AND_2_GOODS'), 'unset': (dice == '2_FOOD_OR_2_WORKERS'), 'keep': (player.dice.diceToKeep.indexOf($index) > -1)}">
+                                                <img ng-src='img/{{dice}}.png'  />
+                                            </div>
+                                            
+                                            <button class='btn btn-primary btn-xs' ng-if="dice.charAt(0) == '2'" ng-click="toggleDice($index)">Change</button>
                                         </div>
-                                        
-                                        <button class='btn btn-primary btn-xs' ng-if="dice.charAt(0) == '2'" ng-click="toggleDice($index)">Change</button>
+                                    </div>
+
+                                    <div class='col-xs-2'>
+                                        <button ng-disabled="!(!player.dice || player.dice.rollsCompleted < game.maxRolls() || player.dice.leadershipRoll())" class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class='col-xs-2'>
-                                    <button ng-disabled="!(!player.dice || player.dice.rollsCompleted < game.maxRolls() || player.dice.leadershipRoll())" class='btn btn-primary pull-right' ng-click='player.roll()'>Roll Dice</button>
+                            <div class='panel-footer' style='background-color: #f2dede' ng-if="player.dice.disasterType() && player.dice.disasterType() != 'None'">
+                                
+                                <strong>DISASTER:</strong>  {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})
+                                
+                            </div>
+
+                        </div>
+
+                        
+
+                        <div id="myGoods" class='bg-warning'>
+                            <div class='row'>
+                                <div class='goods col-xs-12'>
+                                    <div class='good' ng-class='{ {{goodType}}: true }' ng-repeat='goodType in player.goods.goodTypesReversed'>
+                                        <div class='type'>{{goodType}}</div>
+                                        <div class='cost' ng-class="{'selected': $index == player.goods.goods[goodType]}" ng-repeat='cost in player.goods.goodValues[goodType]'>{{cost}}</div>
+                                    </div>
+
+                                    <div class='good'>
+                                        <div class='type'><strong>Total Goods</strong></div>
+                                        <div class='cost'><strong>{{player.goods.total()}}</strong></div>
+                                    </div>
+                                    <div class='good'>
+                                        <div class='type'><strong>Goods Value</strong></div>
+                                        <div class='cost'><strong>{{player.goods.value()}}</strong></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class='panel-footer' style='background-color: #f2dede' ng-if="player.dice.disasterType() && player.dice.disasterType() != 'None'">
-                            
-                            <strong>DISASTER:</strong>  {{player.dice.disasterType()}} ({{player.dice.disasterEffect()}})
-                            
-                        </div>
-
-                    </div>
-
-                    
-
-                    <div id="myGoods" class='bg-warning'>
-                        <div class='row'>
-                            <div class='goods col-xs-12'>
-                                <div class='good' ng-class='{ {{goodType}}: true }' ng-repeat='goodType in player.goods.goodTypesReversed'>
-                                    <div class='type'>{{goodType}}</div>
-                                    <div class='cost' ng-class="{'selected': $index == player.goods.goods[goodType]}" ng-repeat='cost in player.goods.goodValues[goodType]'>{{cost}}</div>
-                                </div>
-
-                                <div class='good'>
-                                    <div class='type'><strong>Total Goods</strong></div>
-                                    <div class='cost'><strong>{{player.goods.total()}}</strong></div>
-                                </div>
-                                <div class='good'>
-                                    <div class='type'><strong>Goods Value</strong></div>
-                                    <div class='cost'><strong>{{player.goods.value()}}</strong></div>
+                        <div id='myFood' class='bg-success'>
+                            <div class='row'>
+                                <div class='food col-xs-12'>
+                                    <div class='type'>Food</div>
+                                    <div class='count' ng-class="{'selected': $index == player.food}" ng-repeat='i in toArray(game.maxFood()+1) track by $index'>{{$index}}</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div id='myFood' class='bg-success'>
-                        <div class='row'>
-                            <div class='food col-xs-12'>
-                                <div class='type'>Food</div>
-                                <div class='count' ng-class="{'selected': $index == player.food}" ng-repeat='i in toArray(game.maxFood()+1) track by $index'>{{$index}}</div>
+                        <div id='myCities' class='bg-info'>
+                            <div class='row'>
+                                <div class='cities col-xs-12'>
+                                    <div class='type'>Cities</div>
+                                    <div class='city'></div><!-- empty city, so the zeros line up -->
+                                    <div class='city' ng-class="{'completed': city.completed, 'progressing': (!city.completed && city.filledSpaces > 0)}" ng-repeat='city in player.cities.cities'>{{city.filledSpaces}} / {{city.totalSpaces}}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div id='myCities' class='bg-info'>
-                        <div class='row'>
-                            <div class='cities col-xs-12'>
-                                <div class='type'>Cities</div>
-                                <div class='city' ng-class="{'completed': city.completed, 'progressing': (!city.completed && city.filledSpaces > 0)}" ng-repeat='city in player.cities.cities'>{{city.filledSpaces}} / {{city.totalSpaces}}</div>
+                        <div id='myFood' class='bg-danger'>
+                            <div class='row'>
+                                <div class='food col-xs-12' style='color: #a94442'>
+                                    <div class='type'>Disasters</div>
+                                    <div class='count'><strong>{{player.disasters}}</strong></div>
+                                </div>
                             </div>
                         </div>
+
+                        <h3>Developments</h3>
+                        <table class="table table-bordered" style='padding: 2px'>
+                          
+                            <tr>
+                                <th style='padding: 2px'>Cost</th>
+                                <th style='padding: 2px'>Owned</th>
+                                <th style='padding: 2px'>Name</th>
+                                <th style='padding: 2px'>Points</th>
+                                <th style='padding: 2px'>Effect</th>
+                            </tr>
+                            <tr ng-repeat="development in player.developments.developments" ng-class='{success: development.purchased}'>
+                                <td style='padding: 2px'>{{development.cost}}</td>
+                                <td style='padding: 2px'>{{development.purchased}}</td>
+                                <td style='padding: 2px'>{{development.name}}</td>
+                                <td style='padding: 2px'>{{development.points}}</td>
+                                <td style='padding: 2px'>{{development.effect}}</td>
+                            </tr>
+                        </table>
+
+                        <h3>Monuments</h3>
+                        <table class="table table-bordered" style='padding: 2px'>
+                          
+                            <tr>
+                                <th style='padding: 2px'>Name</th>
+                                <th style='padding: 2px'>Completed</th>
+                                <th style='padding: 2px'>Spaces</th>
+                                <th style='padding: 2px'>Points</th>
+                                <th style='padding: 2px'>First Completed By</th>
+                            </tr>
+                            <tr ng-repeat="monument in player.monuments.monuments" ng-class="{success: monument.completed, warning: (!monument.completed && monument.filledSpaces > 0), 'invalid-monument': !player.monuments.validPlayerCount(monument.name)}">
+                                <td style='padding: 2px'>{{monument.name}}</td>
+                                <td style='padding: 2px'>{{monument.completed}}</td>
+                                <td style='padding: 2px'>{{monument.filledSpaces}} / {{monument.totalSpaces}}</td>
+                                <td style='padding: 2px'>{{monument.pointsFirst}} / {{monument.pointsNotFirst}}</td>
+                                <td style='padding: 2px'></td>
+                            </tr>
+                        </table>
                     </div>
-
-                    <div id='myFood' class='bg-danger'>
-                        <div class='row'>
-                            <div class='food col-xs-12' style='color: #a94442'>
-                                <div class='type'>Disasters</div>
-                                <div class='count'><strong>{{player.disasters}}<strong></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3>Developments</h3>
-                    <table class="table table-bordered" style='padding: 2px'>
-                      
-                        <tr>
-                            <th style='padding: 2px'>Cost</th>
-                            <th style='padding: 2px'>Owned</th>
-                            <th style='padding: 2px'>Name</th>
-                            <th style='padding: 2px'>Points</th>
-                            <th style='padding: 2px'>Effect</th>
-                        </tr>
-                        <tr ng-repeat="development in player.developments.developments" ng-class='{success: development.purchased}'>
-                            <td style='padding: 2px'>{{development.cost}}</td>
-                            <td style='padding: 2px'>{{development.purchased}}</td>
-                            <td style='padding: 2px'>{{development.name}}</td>
-                            <td style='padding: 2px'>{{development.points}}</td>
-                            <td style='padding: 2px'>{{development.effect}}</td>
-                        </tr>
-                    </table>
-
-                    <h3>Monuments</h3>
-                    <table class="table table-bordered" style='padding: 2px'>
-                      
-                        <tr>
-                            <th style='padding: 2px'>Name</th>
-                            <th style='padding: 2px'>Completed</th>
-                            <th style='padding: 2px'>Spaces</th>
-                            <th style='padding: 2px'>Points</th>
-                            <th style='padding: 2px'>First Completed By</th>
-                        </tr>
-                        <tr ng-repeat="monument in player.monuments.monuments" ng-class='{success: monument.completed, warning: !monument.completed && monument.filledSpaces > 0}'>
-                            <td style='padding: 2px'>{{monument.name}}</td>
-                            <td style='padding: 2px'>{{monument.completed}}</td>
-                            <td style='padding: 2px'>{{monument.filledSpaces}} / {{monument.totalSpaces}}</td>
-                            <td style='padding: 2px'>{{monument.pointsFirst}} / {{monument.pointsNotFirst}}</td>
-                            <td style='padding: 2px'></td>
-                        </tr>
-                    </table>
-
                 </div>
 
-                <div id="otherPlayers" class=''>
-
+                <div id="otherPlayers" ng-show='game.started'>
+                    <div ng-repeat='player in game.players'>{{player.playerName}}</div>
                 </div>
             </div>
         
@@ -192,29 +243,55 @@
         <script type="text/javascript">
         GameApplication.controller("GameController", ['$scope', '$http', '$timeout', function($scope, $http, $timeout )
         {
-            $scope.game = new Game();
-            $scope.player = $scope.game.addPlayer();
-            $scope.player.cities.addWorkers(5);
-            $scope.player.monuments.addWorkersTo("Step Pyramid", 3);
-            $scope.player.monuments.addWorkersTo("Great Wall", 13);
-            $scope.player.monuments.addWorkersTo("Great Pyramid", 5);
-            $scope.player.monuments.addWorkersTo("Hanging Gardens", 5);
-            $scope.player.monuments.addWorkersTo("Temple", 7);
-            $scope.player.monuments.addWorkersTo("Stone Circle", 5);
-            // $scope.player.roll();
-            $scope.player.developments.purchase("Quarrying");
-            $scope.player.developments.purchase("Agriculture");
-            $scope.player.developments.purchase("Coinage");
-            $scope.player.developments.purchase("Masonry");
-            $scope.player.developments.purchase("Irrigation");
-            $scope.player.developments.purchase("Empire");
-            $scope.player.developments.purchase("Architecture");
-            $scope.player.developments.purchase("Engineering");
-            $scope.player.developments.purchase("Graneries");
-            $scope.player.goods.add(13);
-            $scope.player.addFood(12);
-            $scope.player.disasters = 25;
-            $scope.player.debug();
+            $scope.game               = new Game();
+            $scope.myPlayerIndex      = null;
+            $scope.player             = null;
+            $scope.showingPlayerIndex = null;
+            $scope.me                 = null;
+
+            $scope.$watch(
+                function handle( newValue, oldValue ) {
+                    
+                }
+            );
+
+            $scope.newGame = function()
+            {
+                $scope.game.newGame();
+            }
+
+            $scope.addPlayer = function()
+            {
+                $scope.game.addPlayer();
+            }
+
+            $scope.removePlayer = function(playerIndex)
+            {
+                $scope.game.removePlayer(playerIndex);
+            }
+
+            $scope.startGame = function()
+            {
+                var myName = $scope.game.players[0].playerName;
+
+                $scope.game.start();
+
+                for( var p in $scope.game.players ) {
+                    if( $scope.game.players[p].playerName == myName ) {
+                        $scope.myPlayerIndex = p;
+                        break;
+                    }
+                }
+                
+                $scope.showPlayer($scope.myPlayerIndex);
+                $scope.me = $scope.player;
+            }
+
+            $scope.showPlayer = function(playerIndex)
+            {
+                $scope.showingPlayerIndex = playerIndex;
+                $scope.player             = $scope.game.players[playerIndex];
+            }
 
             $scope.toggleDice = function(diceIndex) 
             {

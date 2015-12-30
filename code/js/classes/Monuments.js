@@ -47,8 +47,18 @@ class Monuments
         }
     }
 
+    validPlayerCount(monumentName)
+    {
+        var monument = this.monument(monumentName);
+        return (monument.excludeWhenPlayerCount != this.game.players.length);
+    }
+
     addWorkersTo(monumentName, workers)
     {
+        if( !this.validPlayerCount(monumentName) ) {
+            return; // Invalid player count
+        }
+
         var monument            = this.monument(monumentName);
         monument.filledSpaces   = Math.min( monument.totalSpaces, (monument.filledSpaces + workers) );
         monument.completed      = (monument.filledSpaces == monument.totalSpaces);

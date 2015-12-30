@@ -23,6 +23,16 @@ body
     margin-bottom: 15px;
 }
 
+#newGame table
+{
+    width: 100% ;
+}
+
+#newGame td, #newGame th
+{
+    padding: 10px;
+}
+
 #myBoard
 {
     width: 700px;
@@ -164,4 +174,9 @@ body
 {
     background-color: #ffbb63;
     font-weight: normal !important;
+}
+
+.invalid-monument
+{
+    text-decoration: line-through;
 }

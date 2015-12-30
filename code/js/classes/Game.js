@@ -17,9 +17,8 @@ class Game
     {
         this.players            = [];
         this.currentPlayerIndex = null;
-        this.turnNumber         = 0;
-        this.roundNumber        = 0;
         this.started            = false;
+        this.addPlayer();
     }
 
     addPlayer()
@@ -28,6 +27,38 @@ class Game
             var player = new Player( "Player " + (this.players.length+1), this );
             this.players.push( player );
             return player;
+        }
+    }
+
+    removePlayer( playerIndex )
+    {
+        if( !this.started ) {
+            this.players.splice( playerIndex, 1 );
+        }
+    }
+
+    currentPlayer()
+    {
+        return this.players[this.currentPlayerIndex];
+    }
+
+    start()
+    {
+        if( !this.started ) {
+            for( var p1 in this.players ) {
+                for( var p2 in this.players ) {
+                    if( p1 != p2 && this.players[p1].playerName == this.players[p2].playerName ) {
+                        alert("All players must have different names.");
+                        return;
+                    }
+                }
+            }
+
+            this.started = true;
+            // Randomly assign turn order
+            arrayShuffle(this.players);
+
+            this.currentPlayerIndex = 0;
         }
     }
 

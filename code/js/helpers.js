@@ -32,3 +32,8 @@ function pad(str, len, pad, dir) {
 
     return str;
 }
+
+function arrayShuffle(myArray){
+    for(var j, x, i = myArray.length; i; j = Math.floor(Math.random() * i), x = myArray[--i], myArray[i] = myArray[j], myArray[j] = x);
+    return myArray;
+}
