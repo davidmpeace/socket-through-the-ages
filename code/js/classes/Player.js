@@ -58,6 +58,28 @@ class Player
         return (this.game.currentPlayer().playerName == this.playerName);
     }
 
+    isStage( stageName )
+    {
+        switch( stageName )
+        {
+            case "TURN_STAGE_WAITING": return this.turnStage == TURN_STAGE_WAITING;
+            case "TURN_STAGE_START": return this.turnStage == TURN_STAGE_START;
+            case "TURN_STAGE_ROLLING": return this.turnStage == TURN_STAGE_ROLLING;
+            case "TURN_STAGE_LEADERSHIP": return this.turnStage == TURN_STAGE_LEADERSHIP;
+            case "TURN_STAGE_ROLL_COMPLETE": return this.turnStage == TURN_STAGE_ROLL_COMPLETE;
+            case "TURN_STAGE_DICE_FINALIZED": return this.turnStage == TURN_STAGE_DICE_FINALIZED;
+            case "TURN_STAGE_COLLECT": return this.turnStage == TURN_STAGE_COLLECT;
+            case "TURN_STAGE_WORKERS": return this.turnStage == TURN_STAGE_WORKERS;
+            case "TURN_STAGE_PURCHASE": return this.turnStage == TURN_STAGE_PURCHASE;
+            case "TURN_STAGE_DISCARD": return this.turnStage == TURN_STAGE_DISCARD;
+        }
+    }
+
+    canRoll()
+    {
+        return this.isMyTurn() && (this.turnStage == TURN_STAGE_START || this.turnStage == TURN_STAGE_ROLLING);
+    }
+
     isInOneOfStages(arrayOfAcceptableStages)
     {
         for( var i in arrayOfAcceptableStages ) {
@@ -69,18 +91,24 @@ class Player
         return false;
     }
 
+    startTurn()
+    {
+        this.turnStage = TURN_STAGE_START;
+    }
+
     rollDice( diceIndices )
     {
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_START, TURN_STAGE_ROLLING]) ) { return; }
 
         if( this.turnStage == TURN_STAGE_START) {
-            this.dice = new Dice(this.game, this);
+            this.dice      = new Dice(this.game, this);
+            this.turnStage = TURN_STAGE_ROLLING;
         }
 
         this.dice.roll(diceIndices);
 
-        if( !this.dice.canRoll() ) {
+        if( !this.dice.canRoll ) {
             if( this.dice.canRollLeadershipDie() ) {
                 this.turnStage = TURN_STAGE_LEADERSHIP;
             } else {
@@ -137,7 +165,7 @@ class Player
             var famines    = -remainingFood;
             this.disasters += famines;
         }
-        return famines;
+        this.dice.resultingFamines = famines;
     }
 
     resolveDisasters()
@@ -264,7 +292,7 @@ class Player
     debug()
     {
         console.log("Player State Debug for: " + this.playerName);
-        console.log("Stage: " + this.stage());
+        console.log("Stage: " + this.currentStageDescription());
 
         this.cities.debug();
         this.developments.debug();

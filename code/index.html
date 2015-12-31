@@ -115,8 +115,8 @@
                                     </div>
 
                                     <div class='col-xs-2'>
-                                        <button ng-show="my.dice.canRoll()" class='btn btn-primary pull-right' ng-click='my.rollDice()'>Roll Dice</button>
-                                        <button ng-show="my.dice.leadershipRoll()" ng-click='my.rollDice()'>Leadership</button>
+                                        <button ng-disabled="!my.canRoll()" class='btn btn-primary pull-right' ng-click='my.rollDice()'>Roll Dice</button>
+                                        <button ng-show="my.isStage('TURN_STAGE_LEADERSHIP')">Leadership</button>
                                     </div>
                                 </div>
                             </div>
@@ -348,6 +348,8 @@
                 }
                 
                 $scope.my = $scope.game.players[$scope.myPlayerIndex];
+                $scope.my.developments.purchase("Leadership", 20);
+                $scope.my.debug();
             }
 
             $scope.toggleType = function(diceIndex) 

@@ -59,6 +59,8 @@ class Game
             arrayShuffle(this.players);
 
             this.currentPlayerIndex = 0;
+
+            this.players[0].startTurn();
         }
     }
 

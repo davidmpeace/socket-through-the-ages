@@ -55,6 +55,8 @@ class Dice
         this.useableWorkers = 0;
         this.useableGoods   = 0;
         this.useableCoins   = 0;
+
+        this.resultingFamines = 0;
     }
 
     canRollLeadershipDie()
@@ -80,6 +82,7 @@ class Dice
             this.rollsCompleted++;
 
             this.canRoll = (this.rollsCompleted < MAX_ROLLS);
+            console.log(this.rollsCompleted, MAX_ROLLS);
         }
     }
 
