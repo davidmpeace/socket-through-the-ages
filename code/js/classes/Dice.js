@@ -47,16 +47,28 @@ class Dice
         ];
 
         this.diceToKeep = [];
+
+        this.canRoll        = true;
+        this.diceFinalized  = false; // Set to true when all rolling is done, and food\worker combos have been chosen.
+
+        this.useableFood    = 0;
+        this.useableWorkers = 0;
+        this.useableGoods   = 0;
+        this.useableCoins   = 0;
     }
 
-    leadershipRoll()
+    canRollLeadershipDie()
     {
+        if( this.diceFinalized ) { return false; }
+
         return (this.rollsCompleted == MAX_ROLLS && this.player.developments.has("Leadership"));
     }
 
     roll()
     {
-        if( this.rollsCompleted < MAX_ROLLS ) {
+        if( this.diceFinalized ) { return false; }
+
+        if( this.canRoll ) {
             var rolledIndex;
             for( var i = 0; i < this.totalDie; i++ ) {
                 if( this.diceToKeep.indexOf(i) == -1 && this.dice[i] != DICE_1_SKULL_AND_2_GOODS ) {
@@ -66,12 +78,99 @@ class Dice
             }
             
             this.rollsCompleted++;
+
+            this.canRoll = (this.rollsCompleted < MAX_ROLLS);
+        }
+    }
+
+    rollLeadershipDice(diceIndex)
+    {
+        if( this.diceFinalized ) { return false; }
+
+        if( this.canRollLeadershipDie() ) {
+            rolledIndex = Math.floor(Math.random() * 6);
+            this.dice[diceIndex] = this.diceSides[rolledIndex];
+            this.rollsCompleted++;
         }
     }
 
     hasOptionalDice()
     {
         return (this.totalOptionalFood() > 0 || this.totalOptionalWorkers() > 0);
+    }
+
+    toggleType(diceIndex)
+    {
+        if( this.diceFinalized ) { return false; }
+
+        var diceValue = this.dice[diceIndex];
+        if( diceValue == '2_FOOD_OR_2_WORKERS' ) {
+            this.dice[diceIndex] = '2_FOOD';
+        } else if( diceValue == '2_FOOD' ) {
+            this.dice[diceIndex] = '2_WORKERS';
+        } else if( diceValue == '2_WORKERS' ) {
+            this.dice[diceIndex] = '2_FOOD_OR_2_WORKERS';
+        }
+    }
+
+    toggleKeep(diceIndex)
+    {
+        if( !this.canRoll || this.diceFinalized ) { return false; }
+
+        var diceToKeepIndex = this.diceToKeep.indexOf(diceIndex);
+        if( diceToKeepIndex > -1 ) {
+            this.diceToKeep.splice(diceToKeepIndex, 1);
+        } else {
+            this.diceToKeep.push(diceIndex);
+        }
+    }
+
+    finalizeDice()
+    {
+        if( this.diceFinalized ) { return false; }
+
+        if( this.hasOptionalDice() ) {
+            alert("You must first choose how you want to use the variable dice for Food or Workers.");
+            return false;
+        }
+
+        this.useableFood    = this.totalFixedFood();
+        this.useableWorkers = this.totalFixedWorkers();
+        this.useableGoods   = this.totalGoods();
+        this.useableCoins   = this.totalCoins();
+
+        this.diceFinalized = true;
+
+        return true;
+    }
+
+    takeFood()
+    {
+        var total = this.useableFood;
+        this.useableFood = 0;
+        return total;
+    }
+
+    takeWorkers( workersToTake )
+    {
+        workersToTake = Math.max(0, workersToTake);
+        workersToTake = Math.min(this.useableWorkers, workersToTake);
+        this.useableWorkers -= workersToTake;
+        return workersToTake;
+    }
+
+    takeGoods()
+    {
+        var total = this.useableGoods;
+        this.useableGoods = 0;
+        return total;
+    }
+
+    takeCoins()
+    {
+        var total = this.useableCoins;
+        this.useableCoins = 0;
+        return total;
     }
 
     total(type, dieFace)

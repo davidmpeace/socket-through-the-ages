@@ -7,6 +7,13 @@ class Goods
         this.player = player;
         this.goodTypes          = ['wood','stone','pottery','cloth','spearhead'];
         this.goodTypesReversed  = ['spearhead','cloth','pottery','stone','wood'];
+        this.goodTypeColors = {
+            "spearhead": "#d64705",
+            "cloth":     "#114683",
+            "pottery":   "#981719",
+            "stone":     "#727278",
+            "wood":      "#462f3a"
+        };
         this.goodValues = {
             "spearhead": [0,5,15,30,50],
             "cloth":     [0,4,12,24,40,60],
@@ -14,6 +21,7 @@ class Goods
             "stone":     [0,2,6,12,20,30,42,56],
             "wood":      [0,1,3,6,10,15,21,28,36]
         };
+        this.selectedGoodsForCoins = [];
 
         this.reset();
     }
@@ -27,6 +35,39 @@ class Goods
             "stone":     0,
             "wood":      0
         }
+        this.selectedGoodsForCoins = [];
+    }
+
+    toggleSelectedGood(goodType)
+    {
+        var selectedGoodIndex = this.selectedGoodsForCoins.indexOf(goodType);
+        if( selectedGoodIndex > -1 ) {
+            this.selectedGoodsForCoins.splice(selectedGoodIndex, 1);
+        } else {
+            this.selectedGoodsForCoins.push(goodType);
+        }
+    }
+
+    totalValueForSelectedGoods()
+    {
+        var totalValue = 0;
+        for( var i in this.selectedGoodsForCoins ) {
+            var goodType = this.selectedGoodsForCoins[i];
+            totalValue += this.valueOf(goodType);
+        }
+        return totalValue;
+    }
+
+    emptyGoodsForTypes( goodTypes )
+    {
+        for( var i in goodTypes ) {
+            this.emptyGood(goodTypes[i]);
+        }
+    }
+
+    emptyGood(goodType)
+    {
+        this.goods[goodType] = 0;
     }
 
     total()
@@ -48,6 +89,17 @@ class Goods
             totalGoodsValue += parseInt(valueOfGood);
         }
         return totalGoodsValue;
+    }
+
+    amountOf(goodType)
+    {
+        return this.goods[goodType];
+    }
+
+    valueOf(goodType)
+    {
+        var amount = this.amountOf(goodType);
+        return this.goodValues[goodType][amount];
     }
 
     add(totalGoodsToAdd)

@@ -1,68 +1,134 @@
 "use strict";
+
+var TURN_STAGE_WAITING        = 0;
+var TURN_STAGE_START          = 1;
+var TURN_STAGE_ROLLING        = 2;
+var TURN_STAGE_LEADERSHIP     = 3;
+var TURN_STAGE_ROLL_COMPLETE  = 4;
+var TURN_STAGE_DICE_FINALIZED = 5;
+var TURN_STAGE_COLLECT        = 6;
+var TURN_STAGE_WORKERS        = 7;
+var TURN_STAGE_PURCHASE       = 8;
+var TURN_STAGE_DISCARD        = 9;
+var MAX_STAGES                = 9;
+
 class Player
 {
     constructor(playerName, game)
     {
-        this.playerName = playerName;
-        this.game       = game;
+        this.playerName            = playerName;
+        this.game                  = game;
+        this.lastStageIndex        = 8;
+        this.turnStageDescriptions = [
+            "Waiting for turn",
+            "Ready to Roll",
+            "Roll Dice",
+            "Leadership Roll",
+            "Rolling Complete",
+            "Dice Finalized",
+            "Collect Goods and Food",
+            "Apply Workers",
+            "Purchase Development",
+            "Discard Excess Goods"
+        ];
+
         this.reset();
     }
 
     reset()
     {
-        this.rolling      = false;
-        this.goods        = new Goods(this.game, this);
-        this.cities       = new Cities(this.game, this);
-        this.monuments    = new Monuments(this.game, this);
-        this.developments = new Developments(this.game, this);
-        this.dice         = null;
-        this.food         = 3;
-        this.disasters    = 0;
+        this.goods          = new Goods(this.game, this);
+        this.cities         = new Cities(this.game, this);
+        this.monuments      = new Monuments(this.game, this);
+        this.developments   = new Developments(this.game, this);
+        this.turnStage      = 0;
+        
+        this.dice           = null;
+        this.food           = 3;
+        this.disasters      = 0;
     }
 
-    myTurn()
+    currentStageDescription()
+    {
+        return this.turnStageDescriptions[this.turnStage];
+    }
+
+    isMyTurn()
     {
         return (this.game.currentPlayer().playerName == this.playerName);
     }
 
-    roll( diceIndices )
+    isInOneOfStages(arrayOfAcceptableStages)
     {
-        if( !this.myTurn() ) {
-            return; // It's not my turn
+        for( var i in arrayOfAcceptableStages ) {
+            if( this.turnStage == arrayOfAcceptableStages[i] ) {
+                return true;
+            }
         }
 
-        this.rolling = true;
-        if( !this.dice ) {
+        return false;
+    }
+
+    rollDice( diceIndices )
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_START, TURN_STAGE_ROLLING]) ) { return; }
+
+        if( this.turnStage == TURN_STAGE_START) {
             this.dice = new Dice(this.game, this);
         }
+
         this.dice.roll(diceIndices);
+
+        if( !this.dice.canRoll() ) {
+            if( this.dice.canRollLeadershipDie() ) {
+                this.turnStage = TURN_STAGE_LEADERSHIP;
+            } else {
+                this.turnStage = TURN_STAGE_ROLL_COMPLETE;
+            }
+        }
     }
 
-    doneRolling()
+    rollLeadershipDice( diceIndex )
     {
-        if( !this.myTurn() ) {
-            return; // It's not my turn
-        }
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_LEADERSHIP]) ) { return; }
 
-        this.rolling = false;
-        this.addFood(this.dice.totalFixedFood());
-        this.goods.add(this.dice.totalGoods());
+        this.dice.rollLeadershipDice(diceIndex);
+        this.turnStage = TURN_STAGE_ROLL_COMPLETE;
     }
 
-    addFood(amountToAdd)
+    finalizeDice()
     {
-        if( !this.myTurn() ) {
-            return; // It's not my turn
-        }
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_ROLLING, TURN_STAGE_LEADERSHIP, TURN_STAGE_ROLL_COMPLETE]) ) { return; }
 
-        this.food = Math.min( MAX_FOOD, (this.food + amountToAdd) );
+        if( this.dice.finalizeDice() ) {
+            this.turnStage = TURN_STAGE_DICE_FINALIZED;
+        }
+    }
+
+    collectGoodsAndFood()
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_DICE_FINALIZED]) ) { return; }
+        
+        var totalFood  = this.dice.takeFood();
+        var totalGoods = this.dice.takeGoods();
+
+        this.food = Math.min( MAX_FOOD, (this.food+totalFood) );
+        this.goods.add( totalGoods );
+
+        this.feedCities();
+        this.resolveDisasters();
+
+        this.turnStage = TURN_STAGE_WORKERS;
     }
 
     feedCities()
     {
-        if( !this.myTurn() ) {
-            return; // It's not my turn
-        }
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_DICE_FINALIZED]) ) { return; }
 
         var remainingFood = this.food - this.cities.totalCompleted();
         this.food = Math.max( 0, remainingFood );
@@ -76,9 +142,8 @@ class Player
 
     resolveDisasters()
     {
-        if( !this.myTurn() ) {
-            return; // It's not my turn
-        }
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_DICE_FINALIZED]) ) { return; }
 
         var disasterEffect = this.dice.disasterEffect();
 
@@ -105,6 +170,72 @@ class Player
         }
     }
 
+    applyWorkersToCities( totalWorkers )
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_WORKERS]) ) { return; }
+
+        var totalWorkers = this.dice.takeWorkers(totalWorkers);
+        this.cities.addWorkers(totalWorkers);
+    }
+
+    applyWorkersToMonument( monumentName, totalWorkers )
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_WORKERS]) ) { return; }
+
+        var totalWorkers = this.dice.takeWorkers(totalWorkers);
+        this.monuments.addWorkersTo( monumentName, totalWorkers );
+    }
+
+    doneWithWorkers()
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_WORKERS]) ) { return; }
+
+        this.turnStage = TURN_STAGE_PURCHASE;
+    }
+
+    purchaseDevelopment( developmentName )
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_PURCHASE]) ) { return; }
+
+        if( developmentName.length > 0 ) {
+            var availableCoins = this.totalForCoinDicePlusSelectedGoods();
+            var purchased = this.developments.purchase(developmentName, availableCoins);
+
+            if( purchased ) {
+                this.dice.takeCoins();
+            }
+        }
+     
+        this.turnStage = TURN_STAGE_DISCARD;
+    }
+
+    completeTurn( discardGoods )
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_DISCARD]) ) { return; }
+
+        if( discardGoods && discardGoods.length > 0 ) {
+            this.goods.emptyGoodsForTypes( discardGoods );
+        }
+
+        if( this.goods.total() > 6 && !this.developments.has("Caravans") ) {
+            alert("Must discard goods to be 6 or less.  Get Caravans next time!");
+            return;
+        }
+
+        this.turnStage = TURN_STAGE_WAITING;
+    }
+
+    totalForCoinDicePlusSelectedGoods()
+    {
+        return (this.dice.useableCoins + this.goods.totalValueForSelectedGoods());
+
+    }
+
     developmentPoints()
     {
         return this.developments.totalPoints();
@@ -117,14 +248,7 @@ class Player
 
     bonusPoints()
     {
-        var points = 0;
-        if( this.developments.has("Architecture") ) {
-            points += this.cities.totalCompleted();
-        }
-        if( this.developments.has("Empire") ) {
-            points += this.monuments.totalCompleted();
-        }
-        return points;
+        return this.developments.totalBonusPoints();
     }
 
     subtotal()
@@ -139,6 +263,9 @@ class Player
 
     debug()
     {
+        console.log("Player State Debug for: " + this.playerName);
+        console.log("Stage: " + this.stage());
+
         this.cities.debug();
         this.developments.debug();
         this.monuments.debug();

@@ -78,6 +78,18 @@ class Monuments
         }
     }
 
+    allWithWorkers()
+    {
+        var monuments = [];
+        for( var i in this.monuments ) {
+            var monument = this.monuments[i];
+            if( monument.filledSpaces > 0 ) {
+                monuments.push(monument);
+            }
+        }
+        return monuments;
+    }
+
     totalCompleted()
     {
         var totalCompleted = 0;
@@ -96,14 +108,23 @@ class Monuments
         return monument.completed;
     }
 
+    pointsFor(monumentName)
+    {
+        var points = 0;
+        var monument = this.monument(monumentName);
+        if( monument.completed ) {
+            points = (monument.completedFirst) ? monument.pointsFirst : monument.pointsNotFirst;
+        }
+        
+        return points;
+    }
+
     totalPoints()
     {
         var points = 0;
         for( var i in this.monuments ) {
             var monument = this.monuments[i];
-            if( monument.completed ) {
-                points += (monument.completedFirst) ? monument.pointsFirst : monument.pointsNotFirst;
-            }
+            points += this.pointsFor(monument.name);
         }
         return points;
     }

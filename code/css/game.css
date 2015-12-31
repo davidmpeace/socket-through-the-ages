@@ -95,7 +95,7 @@ body
     background-color: #f6eee1;
 }
 
-.good, .food, .cities
+.good, .food, .cities, .good-summary
 {
     height: 14px;
     font-size: 12px;
@@ -110,7 +110,7 @@ body
     width: 100px;
 }
 
-#myGoods .goods .good .cost, #myFood .count, .city
+#myGoods .goods .good .cost, .count, .city, .good-summary
 {
     display: inline-block;
     width: 30px;
@@ -118,35 +118,10 @@ body
     text-align: center;
 }
 
-#myGoods .goods .good .cost.selected, #myFood .food .count.selected, .city.completed
+#myGoods .goods .good .cost.selected, .count.selected, .city.completed, .good-summary
 {
     color: #fff;
     font-weight: bold;
-}
-
-#myGoods .goods .good.spearhead .cost.selected
-{
-    background-color: #d64705;
-}
-
-#myGoods .goods .good.cloth .cost.selected
-{
-    background-color: #114683;
-}
-
-#myGoods .goods .good.pottery .cost.selected
-{
-    background-color: #981719;
-}
-
-#myGoods .goods .good.stone .cost.selected
-{
-    background-color: #727278;
-}
-
-#myGoods .goods .good.wood .cost.selected
-{
-    background-color: #462f3a;
 }
 
 #myGoods .goods .good.food
@@ -179,4 +154,32 @@ body
 .invalid-monument
 {
     text-decoration: line-through;
+}
+
+.player-summary
+{
+    width: 100%;
+    height: 14px;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.player-summary td
+{
+    margin: 4px;
+}
+
+.good-total
+{
+    text-align: center;
+}
+
+.player-summary
+{
+    border: solid #ddd 1px;
+}
+.player-totals td
+{
+    width: 33%;
+    padding: 3px;
 }

@@ -57,6 +57,16 @@ class Cities
         return totalCompleted;
     }
 
+    full()
+    {
+        return (this.totalCompleted() == this.cities.length);
+    }
+
+    nextCity()
+    {
+        return this.cities[this.totalCompleted()];
+    }
+
     debug()
     {
         var debug = "Cities:\n";

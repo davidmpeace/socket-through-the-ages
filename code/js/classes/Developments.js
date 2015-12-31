@@ -39,39 +39,74 @@ class Developments
         return newDevelopment;
     }
 
-    purchase(developmentName)
+    development(developmentName)
     {
         for( var i in this.developments ) {
             var development = this.developments[i];
-            if( development.name == developmentName && !development.purchased ) {
-                development.purchased = true;
-                return true;
+            if( development.name == developmentName ) {
+                return development;
             }
         }
+    }
+
+    purchase(developmentName, coins)
+    {
+        var development = this.development(developmentName)
+
+        if( development ) {
+            if( !development.purchased ) {
+                if( coins >= development.cost ) {
+                    development.purchased = true;
+                    return true;
+                } else {
+                    alert( coins + " is not enough to purchase this development. This development costs "+development.cost+" coins.");
+                }
+            }
+        }
+
         return false;
     }
 
     has(developmentName)
     {
+        var development = this.development(developmentName)
+
+        if( development ) {
+            return development.purchased;
+        }
+        
+        return false;
+    }
+
+    allPurchased()
+    {
+        var purchasedDevelopments = [];
         for( var i in this.developments ) {
             var development = this.developments[i];
-            if( development.name == developmentName ) {
-                return development.purchased;
+            if( development.purchased ) {
+                purchasedDevelopments.push(development);
             }
         }
-        return false;
+        return purchasedDevelopments;
     }
 
     totalPurchased()
     {
-        var totalPurchased = 0;
-        for( var i in this.developments ) {
-            var development = this.developments[i];
-            if( development.purchased ) {
-                totalPurchased++;
+        return this.allPurchased().length;
+    }
+
+    bonusPointsFor(developmentName)
+    {
+        var bonusPoints = 0;
+        if( this.has(developmentName) ) {
+            if( developmentName == 'Architecture' ) {
+                bonusPoints = this.player.monuments.totalCompleted();
+            } else if( developmentName == "Empire" ) {
+                bonusPoints = this.player.cities.totalCompleted();
             }
         }
-        return totalPurchased;
+        
+        return bonusPoints;
     }
 
     totalPoints()
@@ -84,6 +119,16 @@ class Developments
             }
         }
         return points;
+    }
+
+    totalBonusPoints()
+    {
+        var bonusPoints = 0;
+        for( var i in this.developments ) {
+            var development = this.developments[i];
+            bonusPoints += this.bonusPointsFor(development.name);
+        }
+        return bonusPoints;
     }
 
     debug()
