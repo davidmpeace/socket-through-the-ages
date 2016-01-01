@@ -41,7 +41,6 @@ class Player
         this.cities                = new Cities(this);
         this.monuments             = new Monuments(this);
         this.developments          = new Developments(this);
-        this.goodsToSell           = {};
         this.developmentToPurchase = null;
         this.turnStage             = 0;
         
@@ -200,24 +199,28 @@ class Player
         var disasterEffect = this.dice.disasterEffect();
 
         if( disasterEffect == DISASTER_EFFECT_DROUGHT ) {
+            // Drought - 2 disasters
             this.disasters += 2;
         } else if( disasterEffect == DISASTER_EFFECT_PESTILENCE ) {
-            for( var p in this.game.players ) {
-                var otherPlayer = this.game.players[p];
-                if( otherPlayer.name != this.name && !otherPlayer.developments.has("Medicine") ) {
+            // Pestilence - Other players get 3 disasters unless they have Medicine
+            var otherPlayers = this.game.otherPlayers(this);
+            for( var i in otherPlayers ) {
+                var otherPlayer = otherPlayers[i];
+                if( !otherPlayer.developments.has("Medicine") ) {
                     otherPlayer.disasters += 3;
                 }
             }
         } else if( disasterEffect == DISASTER_EFFECT_INVASION ) {
+            // Invasion - 4 disasters
             this.disasters += 4;
         } else if( disasterEffect == DISASTER_EFFECT_REVOLT ) {
-            this.goods.reset();
+            // Revolt - discard all goods
+            this.goods.discardAll();
         } else if( disasterEffect == DISASTER_EFFECT_REVOLT_WITH_RELIGION ) {
-            for( var p in this.game.players ) {
-                var otherPlayer = this.game.players[p];
-                if( otherPlayer.name != this.name ) {
-                    otherPlayer.goods.reset();
-                }
+            // Revolt affects opponents
+            var otherPlayers = this.game.otherPlayers(this);
+            for( var i in otherPlayers ) {
+                otherPlayers[i].goods.discardAll();
             }
         }
     }
@@ -253,28 +256,16 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_WORKERS]) ) { return; }
 
-        this.goodsToSell           = {};
         this.developmentToPurchase = null;
 
         this.turnStage = TURN_STAGE_PURCHASE;
-    }
-
-    totalCoinsFromGoodsSold()
-    {
-        var total = 0;
-        for( var goodType in this.goodsToSell ) {
-            if(this.goodsToSell[goodType]) {
-                total += this.goods.valueOf(goodType);
-            }
-        }
-        return total;
     }
 
     totalAvailableCoins()
     {
         if( !this.isMyTurn() ) { return 0; }
 
-        return this.dice.totalCoins() + this.totalCoinsFromGoodsSold();
+        return this.dice.totalCoins() + this.goods.totalValueForSelectedGoods();
     }
 
     selectDevelopment( development )
@@ -305,11 +296,9 @@ class Player
     {
         this.dice.takeCoins();
 
-        for( var goodType in this.goodsToSell ) {
-            if( this.goodsToSell[goodType] ) {
-                this.game.log( goodType + ": Selling for " + this.goods.valueOf(goodType) + " coins." );
-                this.goods.emptyGood(goodType);
-            }
+        var selectedGoods = this.goods.selectedGoodsToSell();
+        for( var i in selectedGoods ) {
+            selectedGoods[i].sell();
         }
     }
 
@@ -318,10 +307,10 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_PURCHASE]) ) { return; }
 
-        this.goodsToSell           = {};
+        this.goods.deselectAllGoodsForSale();
         this.developmentToPurchase = null;
 
-        if( this.goods.total() > 6 && !this.developments.has("Caravans") ) {
+        if( this.goods.quantityNeededToDiscard() > 0 ) {
             this.turnStage = TURN_STAGE_DISCARD;
         } else {
             this.completeTurn();
@@ -333,9 +322,12 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_DISCARD]) ) { return; }
 
-        for( var i in this.goodsToSell ) {
-            this.goods.emptyGood(i);
+        var selectedGoods = this.goods.selectedGoodsToSell();
+        for( var i in selectedGoods ) {
+            selectedGoods[i].discard();
         }
+
+        this.goods.deselectAllGoodsForSale();
 
         this.completeTurn();
     }
@@ -345,7 +337,7 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_PURCHASE, TURN_STAGE_DISCARD]) ) { return; }
 
-        if( this.goods.total() > 6 && !this.developments.has("Caravans") ) {
+        if( this.goods.quantityNeededToDiscard() > 0 ) {
             alert("Must discard goods to be 6 or less.  Get Caravans next time!");
             return;
         }

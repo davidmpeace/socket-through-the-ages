@@ -8,43 +8,42 @@ class Cities
         this.reset();
     }
 
+    /**
+     * Reset the Cities collection back to it's default state of cities.
+     */
     reset()
     {
         this.cities = [];
 
-        this.cities.push( this.newCity(0) );
-        this.cities.push( this.newCity(0) );
-        this.cities.push( this.newCity(0) );
-        this.cities.push( this.newCity(3) );
-        this.cities.push( this.newCity(4) );
-        this.cities.push( this.newCity(5) );
-        this.cities.push( this.newCity(6) );
+        //                               Spaces
+        this.cities.push( new City(this, 0) );
+        this.cities.push( new City(this, 0) );
+        this.cities.push( new City(this, 0) );
+        this.cities.push( new City(this, 3) );
+        this.cities.push( new City(this, 4) );
+        this.cities.push( new City(this, 5) );
+        this.cities.push( new City(this, 6) );
     }
 
-    newCity(spaces)
-    {
-        var newCity = {
-            "totalSpaces": spaces,
-            "filledSpaces": 0,
-            "completed": (spaces == 0) ? true : false
-        }
-        return newCity;
-    }
-
+    /**
+     * Incrementally add workers to cities
+     */
     addWorkers(workers) 
     {
         for( var i = 0; i < workers; i++ ) {
             for( var j in this.cities ) {
                 var city = this.cities[j];
                 if( !city.completed ) {
-                    city.filledSpaces++;
-                    city.completed = (city.filledSpaces == city.totalSpaces);
+                    city.addWorker();
                     break;
                 }
             }
         }
     }
 
+    /**
+     * Total number of completed cities
+     */
     totalCompleted()
     {
         var totalCompleted = 0;
@@ -57,6 +56,9 @@ class Cities
         return totalCompleted;
     }
 
+    /**
+     * A total number of open remaining spaces in cities
+     */
     remainingSpaces()
     {
         var remaining = 0;
@@ -67,29 +69,32 @@ class Cities
         return remaining;
     }
 
+    /**
+     * Returns true if all cities are full
+     */
     full()
     {
         return (this.totalCompleted() == this.cities.length);
     }
 
+    /**
+     * Get the next city object
+     */
     nextCity()
     {
         return this.cities[this.totalCompleted()];
     }
 
+    /**
+     * Debug
+     */
     debug()
     {
         var debug = "Cities:\n";
         for( var c in this.cities ) {
             var city = this.cities[c];
             debug += "City " + parseInt(parseInt(c)+1) + ") ";
-            if( city.completed ) {
-                debug += "[X] ";
-            } else { 
-                debug += "[ ] ";
-            }
-            debug += city.filledSpaces + "/" + city.totalSpaces
-            debug += "\n";
+            debug += city.debug();
         }
         console.log(debug);
     }

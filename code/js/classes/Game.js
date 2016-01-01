@@ -20,6 +20,7 @@ class Game
         this.error              = null;
         this.currentPlayerIndex = null;
         this.started            = false;
+        this.firstToMonument    = {};
         this.addPlayer();
     }
 

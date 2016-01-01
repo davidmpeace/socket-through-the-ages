@@ -20,11 +20,11 @@ class Monument
      */
     reset()
     {
-        this.filledSpaces           = 0;
-        this.openSpaces             = this.totalSpaces;
-        this.completed              = false;
-        this.completedFirst         = false;
-        this.points                 = 0;
+        this.filledSpaces                    = 0;
+        this.openSpaces                      = this.totalSpaces;
+        this.completed                       = false;
+        this.points                          = 0;
+        this.game.firstToMonument[this.name] = false;
     }
 
     /**
@@ -50,31 +50,16 @@ class Monument
         this.openSpaces   = Math.max(this.totalSpaces - this.filledSpaces, 0);
         this.completed    = (this.openSpaces == 0);
         
-        if( this.completed ) {
-            this.completedFirst = true;
-
-            // Check to see if others completed the monument before this player.
-            var otherPlayers = this.game.otherPlayers(this.player);
-            for( var i in otherPlayers ) {
-                 var otherPlayer = otherPlayers[i];
-
-                if( otherPlayer.monuments.hasCompleted(monumentName) ) {
-                    this.completedFirst = false;
-                }
-            }
-
-            this.points = (this.completedFirst) ? this.pointsFirst : this.pointsNotFirst;
-        } else {
-            this.points = 0;
-        }
-
         this.game.log( this.name + ": Added " + numberOfWorkers + " workers. ["+this.filledSpaces+"/"+this.totalSpaces+"]" );
 
         if( this.completed ) {
-            if( this.completedFirst ) {
-                this.game.log( this.name + ": Completed First for " + this.points + " pts." );
+            if( this.game.firstToMonument[this.name] ) {
+                this.points = this.pointsNotFirst;
+                this.game.log( this.name + ": Completed for " + this.points + " pts." );
             } else {
-                this.game.log( this.name + ": Not Completed First for " + this.points + " pts." );
+                this.game.firstToMonument[this.name] = this.player.name;
+                this.points = this.pointsFirst;
+                this.game.log( this.name + ": Completed FIRST for " + this.points + " pts." );
             }
         }
     }

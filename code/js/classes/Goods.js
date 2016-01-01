@@ -5,147 +5,144 @@ class Goods
     {
         this.player = player;
         this.game   = player.game;
-        this.goodTypes          = ['wood','stone','pottery','cloth','spearhead'];
-        this.goodTypesReversed  = ['spearhead','cloth','pottery','stone','wood'];
-        this.goodTypeColors = {
-            "spearhead": "#d64705",
-            "cloth":     "#114683",
-            "pottery":   "#981719",
-            "stone":     "#727278",
-            "wood":      "#462f3a"
-        };
-        this.goodValues = {
-            "spearhead": [0,5,15,30,50],
-            "cloth":     [0,4,12,24,40,60],
-            "pottery":   [0,3,9,18,30,45,63],
-            "stone":     [0,2,6,12,20,30,42,56],
-            "wood":      [0,1,3,6,10,15,21,28,36]
-        };
-        this.selectedGoodsForCoins = [];
 
         this.reset();
     }
 
+    /**
+     * Reset the Developments collection back to it's default state of developments.
+     */
     reset()
     {
-        this.goods = {
-            "spearhead": 0,
-            "cloth":     0,
-            "pottery":   0,
-            "stone":     0,
-            "wood":      0
-        }
-        this.selectedGoodsForCoins = [];
+        this.goods = [];
+
+        //                              Name         Color      Values
+        this.goods.push( new Good(this, "spearhead", "#d64705", [0,5,15,30,50])           );
+        this.goods.push( new Good(this, "cloth",     "#114683", [0,4,12,24,40,60])        );
+        this.goods.push( new Good(this, "pottery",   "#981719", [0,3,9,18,30,45,63])      );
+        this.goods.push( new Good(this, "stone",     "#727278", [0,2,6,12,20,30,42,56])   );
+        this.goods.push( new Good(this, "wood",      "#462f3a", [0,1,3,6,10,15,21,28,36]) );
     }
 
-    toggleSelectedGood(goodType)
+    /**
+     * Return the Good with the matching name.
+     */
+    good(goodName)
     {
-        var selectedGoodIndex = this.selectedGoodsForCoins.indexOf(goodType);
-        if( selectedGoodIndex > -1 ) {
-            this.selectedGoodsForCoins.splice(selectedGoodIndex, 1);
-        } else {
-            this.selectedGoodsForCoins.push(goodType);
+        for( var i in this.goods ) {
+            var good = this.goods[i];
+            if( good.name == goodName ) {
+                return good;
+            }
         }
     }
 
+    quantityNeededToDiscard()
+    {
+        if( this.totalQuantity() > this.game.maxGoods() && !this.player.developments.has("Caravans") ) {
+            return this.totalQuantity() - this.game.maxGoods();
+        }
+        return 0;
+    }
+
+    /**
+     * Return an array of selected goods to sell.
+     */
+    selectedGoodsToSell()
+    {
+        var goods = [];
+        for( var i in this.goods ) {
+            var good = this.goods[i];
+            if( good.selectedToSell ) {
+                goods.push(good);
+            }
+        }
+        return goods;
+    }
+
+    totalQuantityForSelectedGoods()
+    {
+        var totalQuantity    = 0;
+        var selectedGoods = this.selectedGoodsToSell();
+        for( var i in selectedGoods ) {
+            totalQuantity += selectedGoods[i].quantity;
+        }
+        return totalQuantity;
+    }
+
+    /**
+     * Return the total value for all selected goods to sell.
+     */
     totalValueForSelectedGoods()
     {
-        var totalValue = 0;
-        for( var i in this.selectedGoodsForCoins ) {
-            var goodType = this.selectedGoodsForCoins[i];
-            totalValue += this.valueOf(goodType);
+        var totalValue    = 0;
+        var selectedGoods = this.selectedGoodsToSell();
+        for( var i in selectedGoods ) {
+            totalValue += selectedGoods[i].value();
         }
         return totalValue;
     }
 
-    isSelected(goodType)
+    deselectAllGoodsForSale()
     {
-        var selectedGoodIndex = this.selectedGoodsForCoins.indexOf(goodType);
-        return (selectedGoodIndex > -1);
-    }
-
-    emptyGoodsForTypes( goodTypes )
-    {
-        for( var i in goodTypes ) {
-            this.emptyGood(goodTypes[i]);
+        for( var i in this.goods ) {
+            this.goods[i].selectedToSell = false;
         }
     }
 
-    emptyGood(goodType)
-    {
-        this.goods[goodType] = 0;
-    }
-
-    total()
+    /**
+     * Return the total quantity of all goods.
+     */
+    totalQuantity()
     {
         var totalGoodsQuantity = 0;
-        for( var key in this.goods ) {
-            var amountOfGood = this.goods[key];
-            totalGoodsQuantity += amountOfGood;
+        for( var i in this.goods ) {
+            totalGoodsQuantity += this.goods[i].quantity;
         }
         return totalGoodsQuantity;
     }
 
-    value()
+    /**
+     * Return the total value of all goods.
+     */
+    totalValue()
     {
         var totalGoodsValue = 0;
-        for( var goodType in this.goods ) {
-            var goodCount   = this.goods[goodType];
-            // console.log(goodCount);
-            // console.log(goodType);
-            var valueOfGood = this.goodValues[goodType][goodCount];
-            totalGoodsValue += parseInt(valueOfGood);
+        for( var i in this.goods ) {
+            totalGoodsValue += parseInt(this.goods[i].value());
         }
         return totalGoodsValue;
     }
 
-    amountOf(goodType)
-    {
-        return this.goods[goodType];
-    }
-
-    valueOf(goodType)
-    {
-        var amount = this.amountOf(goodType);
-        return this.goodValues[goodType][amount];
-    }
-
+    /**
+     * Add a certain amount of goods
+     */
     add(totalGoodsToAdd)
     {
-        var goodIndex = 0;
+        var goodIndex = this.goods.length-1; // Start with the last (cheapest) good
         for( var i = 0; i < totalGoodsToAdd; i++ ) {
-            var goodType         = this.goodTypes[goodIndex];
-            var maxForGood       = (this.goodValues[goodType].length - 1);
-            var currentGoodCount = this.goods[goodType];
-            var amountToAdd      = (goodType == 'stone' && this.player.developments.has("Quarrying") ) ? 2 : 1;
-            var newGoodTotal     = Math.min( maxForGood, (currentGoodCount + amountToAdd) );
-
-            this.goods[goodType] = newGoodTotal;
-
-            goodIndex = ((goodIndex + 1) < this.goodTypes.length) ? (goodIndex + 1) : 0;
+            this.goods[goodIndex].add();
+            goodIndex = (goodIndex == 0) ? this.goods.length-1 : goodIndex - 1;
         }
     }
 
+    discardAll()
+    {
+        for( var i in this.goods ) {
+            this.goods[i].discard();
+        }
+    }
+
+    /**
+     * Debug
+     */
     debug()
     {
         var debug = "Goods:\n";
-        debug += "Total Value of Goods: " + this.value() + "\n";
-        for( var i = (this.goodTypes.length - 1); i >= 0; i-- ) {
-            var goodType   = this.goodTypes[i];
-            debug += pad(goodType+":", 10, ' ', STR_PAD_RIGHT);
-            var goodValues = this.goodValues[goodType];
-            var goodCount  = this.goods[goodType];
-
-            for( var valueIndex in goodValues ) {
-                var goodValue = goodValues[valueIndex]
-                if( valueIndex == goodCount ) {
-                    debug += pad("["+goodValue+"]", 5, ' ', STR_PAD_BOTH);
-                } else {
-                    debug += pad(""+goodValue, 5, ' ', STR_PAD_BOTH);
-                }
-            }
-
-            debug += "\n";
+        debug += "Total Value of Goods: " + this.totalValue() + "\n";
+        for( var i in this.goods ) {
+            var good = this.goods[i];
+            debug += good.debug();
         }
         console.log(debug);
     }
