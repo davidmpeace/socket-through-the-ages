@@ -1,44 +1,39 @@
 "use strict";
 class Developments
 {
-    constructor(game, player)
+    constructor(player)
     {
-        this.game   = game;
         this.player = player;
+        this.game   = player.game;
         this.reset();
     }
 
+    /**
+     * Reset the Developments collection back to it's default state of developments.
+     */
     reset()
     {
         this.developments = [];
 
-        this.developments.push( this.newDevelopment('Leadership',   'Reroll 1 die (after last roll)', 10, 2) );
-        this.developments.push( this.newDevelopment('Irrigation',   'Drought has no effect',          10, 2) );
-        this.developments.push( this.newDevelopment('Agriculture',  '+1 food / food die',             15, 3) );
-        this.developments.push( this.newDevelopment('Quarrying',    '+1 stone if collecting stone',   15, 3) );
-        this.developments.push( this.newDevelopment('Medicine',     'Pestilence has no effect',       15, 3) );
-        this.developments.push( this.newDevelopment('Coinage',      'Coin die results are worth 12',  20, 4) );
-        this.developments.push( this.newDevelopment('Caravans',     'No need to discard goods',       20, 4) );
-        this.developments.push( this.newDevelopment('Religion',     'Revolt affects opponents',       20, 6) );
-        this.developments.push( this.newDevelopment('Granaries',    'Sell food for 4 coins each',     30, 6) );
-        this.developments.push( this.newDevelopment('Masonry',      '+1 worker / worker die',         30, 6) );
-        this.developments.push( this.newDevelopment('Engineering',  'Use stone for 3 workers each',   40, 6) );
-        this.developments.push( this.newDevelopment('Architecture', 'Bonus pts: 1 / monument',        50, 8) );
-        this.developments.push( this.newDevelopment('Empire',       'Bonus pts: 1 / city',            60, 8) );
+        //                                            Name            Effect                            Cost  Points
+        this.developments.push( new Development(this, 'Leadership',   'Reroll 1 die (after last roll)', 10,   2) );
+        this.developments.push( new Development(this, 'Irrigation',   'Drought has no effect',          10,   2) );
+        this.developments.push( new Development(this, 'Agriculture',  '+1 food / food die',             15,   3) );
+        this.developments.push( new Development(this, 'Quarrying',    '+1 stone if collecting stone',   15,   3) );
+        this.developments.push( new Development(this, 'Medicine',     'Pestilence has no effect',       15,   3) );
+        this.developments.push( new Development(this, 'Coinage',      'Coin die results are worth 12',  20,   4) );
+        this.developments.push( new Development(this, 'Caravans',     'No need to discard goods',       20,   4) );
+        this.developments.push( new Development(this, 'Religion',     'Revolt affects opponents',       20,   6) );
+        this.developments.push( new Development(this, 'Granaries',    'Sell food for 4 coins each',     30,   6) );
+        this.developments.push( new Development(this, 'Masonry',      '+1 worker / worker die',         30,   6) );
+        this.developments.push( new Development(this, 'Engineering',  'Use stone for 3 workers each',   40,   6) );
+        this.developments.push( new Development(this, 'Architecture', 'Bonus pts: 1 / monument',        50,   8) );
+        this.developments.push( new Development(this, 'Empire',       'Bonus pts: 1 / city',            60,   8) );
     }
 
-    newDevelopment(name, effect, cost, points)
-    {
-        var newDevelopment = {
-            "name": name,
-            "effect": effect,
-            "cost": cost,
-            "points": points,
-            "purchased": false
-        }
-        return newDevelopment;
-    }
-
+    /**
+     * Return the development with the matching name.
+     */
     development(developmentName)
     {
         for( var i in this.developments ) {
@@ -49,35 +44,25 @@ class Developments
         }
     }
 
-    purchase(developmentName, coins)
+    /**
+     * Attempt to purchase the development.
+     */
+    purchase(developmentName)
     {
-        var development = this.development(developmentName)
-
-        if( development ) {
-            if( !development.purchased ) {
-                if( coins >= development.cost ) {
-                    development.purchased = true;
-                    return true;
-                } else {
-                    alert( coins + " is not enough to purchase this development. This development costs "+development.cost+" coins.");
-                }
-            }
-        }
-
-        return false;
+        return this.development(developmentName).purchase();
     }
 
+    /**
+     * Check if the player owns the development
+     */
     has(developmentName)
     {
-        var development = this.development(developmentName)
-
-        if( development ) {
-            return development.purchased;
-        }
-        
-        return false;
+        return this.development(developmentName).purchased;
     }
 
+    /**
+     * Get all purchased developments
+     */
     allPurchased()
     {
         var purchasedDevelopments = [];
@@ -90,38 +75,41 @@ class Developments
         return purchasedDevelopments;
     }
 
-    totalPurchased()
-    {
-        return this.allPurchased().length;
-    }
-
-    purchaseable()
+    /**
+     * Get list of all purchaseable developments
+     */
+    allPurchaseable()
     {
         var purchaseable = [];
         var totalAvailableCoins = this.player.totalAvailableCoins();
         for( var i in this.developments ) {
             var development = this.developments[i];
-            if( !development.purchased && development.cost <= this.player.totalAvailableCoins() ) {
+            if( development.isPurchaseable() ) {
                 purchaseable.push(development);
             }
         }
         return purchaseable;
     }
 
-    bonusPointsFor(developmentName)
+    /**
+     * Total number of purchased developments.
+     */
+    totalPurchased()
     {
-        var bonusPoints = 0;
-        if( this.has(developmentName) ) {
-            if( developmentName == 'Architecture' ) {
-                bonusPoints = this.player.monuments.totalCompleted();
-            } else if( developmentName == "Empire" ) {
-                bonusPoints = this.player.cities.totalCompleted();
-            }
-        }
-        
-        return bonusPoints;
+        return this.allPurchased().length;
     }
 
+    /**
+     * Total bonus points for a development
+     */
+    bonusPointsFor(developmentName)
+    {
+        return this.development(developmentName).bonusPoints();
+    }
+
+    /**
+     * Total points for all developments (excludes bonus points)
+     */
     totalPoints()
     {
         var points = 0;
@@ -134,29 +122,26 @@ class Developments
         return points;
     }
 
+    /**
+     * Total bonus points for all developments
+     */
     totalBonusPoints()
     {
         var bonusPoints = 0;
         for( var i in this.developments ) {
-            var development = this.developments[i];
-            bonusPoints += this.bonusPointsFor(development.name);
+            bonusPoints += this.developments[i].bonusPoints();
         }
         return bonusPoints;
     }
 
+    /**
+     * Debug
+     */
     debug()
     {
         var debug = "Developments:\n";
         for( var c in this.developments ) {
-            var development = this.developments[c];
-            debug += development.cost + " ";
-            if( development.purchased ) {
-                debug += "[X] ";
-            } else { 
-                debug += "[ ] ";
-            }
-            debug += development.name + " (" + development.points + " pts) " + development.effect;
-            debug += "\n";
+            debug += this.developments[c].debug();
         }
         console.log(debug);
     }

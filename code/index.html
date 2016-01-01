@@ -13,12 +13,18 @@
         </script>
 
         <script src="js/helpers.js"></script>
+        <script src="js/classes/Good.js"></script>
         <script src="js/classes/Goods.js"></script>
+        <script src="js/classes/City.js"></script>
         <script src="js/classes/Cities.js"></script>
+        <script src="js/classes/Monument.js"></script>
         <script src="js/classes/Monuments.js"></script>
+        <script src="js/classes/Development.js"></script>
         <script src="js/classes/Developments.js"></script>
+        <script src="js/classes/Die.js"></script>
         <script src="js/classes/Dice.js"></script>
         <script src="js/classes/Player.js"></script>
+        <script src="js/classes/Logs.js"></script>
         <script src="js/classes/Game.js"></script>
 
     </head>
@@ -50,7 +56,7 @@
                                 </tr>
                                 <tr ng-repeat='player in game.players'>
                                     <td>
-                                        <input type="text" class="form-control" placeholder="Name" ng-model="player.playerName" />
+                                        <input type="text" class="form-control" placeholder="Name" ng-model="player.name" />
                                     </td>
                                     <td>
                                         <a href='javascript:void(0)' ng-if="$index > 0" ng-click='removePlayer($index)'><span class='glyphicon glyphicon-trash'></span></a>
@@ -159,7 +165,7 @@
                                                     <td>{{currentPlayer.cities.remainingSpaces()-applyWorkers['cities']}} Left</td>
                                                     <td><input type='number' class='control form-control' ng-change="workersChanged(applyWorkers['cities'], 'cities')" ng-model="applyWorkers['cities']" /></td>
                                                 </tr>
-                                                <tr ng-repeat="monument in currentPlayer.monuments.incomplete()">
+                                                <tr ng-repeat="monument in currentPlayer.monuments.getAllIncomplete()">
                                                     <td>{{monument.name}}</td>
                                                     <td ng-style="monument.filledSpaces > 0 && {'background-color': '#ffbb63'}">
                                                         {{monument.filledSpaces+applyWorkers[monument.name]}}/{{monument.totalSpaces}}
@@ -183,7 +189,7 @@
                                         +{{currentPlayer.dice.totalCoins()}} Coins from Dice<br/>
                                         <span ng-repeat="goodType in currentPlayer.goods.goodTypes" ng-hide="currentPlayer.goods.amountOf(goodType) == 0">
                                             <label>
-                                                <input type='checkbox' ng-model="currentPlayer.sellGoods[goodType]" /> 
+                                                <input type='checkbox' ng-model="currentPlayer.goodsToSell[goodType]" /> 
                                                 Sell {{currentPlayer.goods.amountOf(goodType)}} {{goodType}} for +{{currentPlayer.goods.valueOf(goodType)}} coins.
                                             </label>
                                             <br/>
@@ -192,11 +198,11 @@
                                         <strong>{{currentPlayer.totalAvailableCoins()}} Coins Available</strong>
                                         <br/>
                                         
-                                        <span ng-show="currentPlayer.developments.purchaseable().length == 0">
+                                        <span ng-show="currentPlayer.developments.allPurchaseable().length == 0">
                                             <br/><br/>(You can't afford anything)<br/><br/>
                                         </span>
 
-                                        <table class='purchaseDevelopment' ng-show="currentPlayer.developments.purchaseable().length > 0">
+                                        <table class='purchaseDevelopment' ng-show="currentPlayer.developments.allPurchaseable().length > 0">
                                             <tr>
                                                 <th></th>
                                                 <th>Cost</th>
@@ -204,9 +210,9 @@
                                                 <th>Points</th>
                                                 <th>Effect</th>
                                             </tr>
-                                            <tr class='development' ng-repeat="development in currentPlayer.developments.purchaseable()" ng-click="currentPlayer.selectDevelopment(development)">
+                                            <tr class='development' ng-repeat="development in currentPlayer.developments.allPurchaseable()" ng-click="currentPlayer.selectDevelopment(development)">
                                                 <td>
-                                                    <input type='radio' ng-model='currentPlayer.purchaseDevelopment' ng-value='development.name' />
+                                                    <input type='radio' ng-model='currentPlayer.developmentToPurchase' ng-value='development.name' />
                                                 </td>
                                                 <td>{{development.cost}}</td>
                                                 <td>{{development.name}}</td>
@@ -222,8 +228,11 @@
                                                 Skip this Step
                                             </button>
 
-                                            <button class='btn btn-success' ng-click='sellAndPurchase()' ng-show="currentPlayer.canPurchaseDevelopment()">
-                                                Sell, Purchase &amp; Continue
+                                            <button class='btn btn-success' ng-click='sellAndPurchase()' ng-show="currentPlayer.developments.development(currentPlayer.developmentToPurchase).isPurchaseable()">
+                                                <span ng-show="currentPlayer.totalCoinsFromGoodsSold() > 0">
+                                                Sell Goods &amp;
+                                                </span>
+                                                Purchase {{currentPlayer.developments.development(currentPlayer.developmentToPurchase).name}}
                                             </button>
                                         </p>
                                     </div>
@@ -312,7 +321,7 @@
                                 <th style='padding: 2px'>Points</th>
                                 <th style='padding: 2px'>First Completed By</th>
                             </tr>
-                            <tr ng-repeat="monument in currentPlayer.monuments.monuments" ng-class="{success: monument.completed, warning: (!monument.completed && monument.filledSpaces > 0), 'invalid-monument': !currentPlayer.monuments.validPlayerCount(monument.name)}">
+                            <tr ng-repeat="monument in currentPlayer.monuments.monuments" ng-class="{success: monument.completed, warning: (!monument.completed && monument.filledSpaces > 0), 'invalid-monument': !monument.isValid()}">
                                 <td style='padding: 2px'>{{monument.name}}</td>
                                 <td style='padding: 2px'>{{monument.completed}}</td>
                                 <td style='padding: 2px'>{{monument.filledSpaces}} / {{monument.totalSpaces}}</td>
@@ -328,7 +337,7 @@
                     <div class="panel" ng-class="{'panel-default': (game.currentPlayerIndex != $index), 'panel-info': (game.currentPlayerIndex == $index)}"  ng-repeat='player in game.players'>
                         <div class="panel-heading">
                             <span ng-if="$index == myPlayerIndex" class="glyphicon glyphicon-user"></span>
-                                {{player.playerName}}
+                                {{player.name}}
 
                             <span class='pull-right'>
                                 {{player.currentStageDescription()}}
@@ -384,7 +393,7 @@
                                 </tr>
                             </table>
                             <table class='player-summary player-totals'>
-                                <tr ng-repeat="monument in player.monuments.allWithWorkers()">
+                                <tr ng-repeat="monument in player.monuments.getAllWithWorkers()">
                                     <td>
                                         <strong ng-if="$index == 0">Monuments:<strong>
                                     </td>
@@ -392,10 +401,10 @@
                                         {{monument.name}}
                                     </td>
                                     <td>
-                                        <span ng-show="player.monuments.completed(monument.name)">
-                                            {{player.monuments.pointsFor(monument.name)}} pts.
+                                        <span ng-show="monument.completed">
+                                            {{monument.points}} pts.
                                         </span>
-                                        <span ng-hide="player.monuments.completed(monument.name)" style='background-color: #ffbb63'>
+                                        <span ng-hide="monument.completed" style='background-color: #ffbb63'>
                                             {{monument.filledSpaces}}/{{monument.totalSpaces}}
                                         </span>
                                     </td>
@@ -437,7 +446,7 @@
                     'cities': 0
                 };
 
-                var incompleteMonuments = $scope.currentPlayer.monuments.incomplete();
+                var incompleteMonuments = $scope.currentPlayer.monuments.getAllIncomplete();
                 for( var i in incompleteMonuments ) {
                     var monument = incompleteMonuments[i];
                     $scope.applyWorkers[monument.name] = 0;
@@ -465,12 +474,12 @@
 
             $scope.startGame = function()
             {
-                var myName = $scope.game.players[0].playerName;
+                var myName = $scope.game.players[0].name;
 
                 $scope.game.start();
 
                 for( var p in $scope.game.players ) {
-                    if( $scope.game.players[p].playerName == myName ) {
+                    if( $scope.game.players[p].name == myName ) {
                         $scope.myPlayerIndex = p;
                         break;
                     }

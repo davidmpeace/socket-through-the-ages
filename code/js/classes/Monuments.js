@@ -1,42 +1,42 @@
 "use strict";
+
 class Monuments
 {
-    constructor(game, player)
+    /**
+     * The Monuments Class is a collection of Monument objects for a player in a game.
+     */
+    constructor(player)
     {
-        this.game   = game;
         this.player = player;
+        this.game   = player.game;
         this.reset();
     }
 
+    /**
+     * Reset the Monuments collection back to it's default state of monuments.
+     */
     reset()
     {
         this.monuments = [];
 
-        this.monuments.push( this.newMonument("Step Pyramid", 3, 1, 0, null) );
-        this.monuments.push( this.newMonument("Stone Circle", 5, 2, 1, null) );
-        this.monuments.push( this.newMonument("Temple", 7, 4, 2, 2) );
-        this.monuments.push( this.newMonument("Hanging Gardens", 11, 8, 4, 3) );
-        this.monuments.push( this.newMonument("Great Pyramid", 15, 12, 6, 2) );
-        this.monuments.push( this.newMonument("Great Wall", 13, 10, 5, null) );
-        this.monuments.push( this.newMonument("Obelisk", 9, 6, 3, null) );
+        //                                      Name               Spaces, Points 1st, Points Other
+        this.monuments.push( new Monument(this, "Step Pyramid",    3,      1,          0) );
+        this.monuments.push( new Monument(this, "Stone Circle",    5,      2,          1) );
+        this.monuments.push( new Monument(this, "Temple",          7,      4,          2) );
+        this.monuments.push( new Monument(this, "Hanging Gardens", 11,     8,          4) );
+        this.monuments.push( new Monument(this, "Great Pyramid",   15,     12,         6) );
+        this.monuments.push( new Monument(this, "Great Wall",      13,     10,         5) );
+        this.monuments.push( new Monument(this, "Obelisk",         9,      6,          3) );
+
+        this.monument("Temple").invalidWhenPlayerCount          = 2;
+        this.monument("Hanging Gardens").invalidWhenPlayerCount = 3;
+        this.monument("Great Pyramid").invalidWhenPlayerCount   = 2;
+        this.monument("Great Wall").effect                      = "(Invasion has no effect)";
     }
 
-    newMonument(name, spaces, pointsFirst, pointsNotFirst, excludeWhenPlayerCount)
-    {
-        var newMonument = {
-            "name": name,
-            "totalSpaces": spaces,
-            "filledSpaces": 0,
-            "pointsFirst": pointsFirst,
-            "pointsNotFirst": pointsNotFirst,
-            "excludeWhenPlayerCount": excludeWhenPlayerCount,
-            "completed": false,
-            "completedFirst": false
-        }
-
-        return newMonument;
-    }
-
+    /**
+     * Return the monument with the matching name.
+     */
     monument(monumentName)
     {
         for( var i in this.monuments ) {
@@ -47,112 +47,96 @@ class Monuments
         }
     }
 
-    validPlayerCount(monumentName)
+    /**
+     * Add workers to a specific monument.
+     */
+    addWorkersTo(monumentName, numberOfWorkers)
     {
-        var monument = this.monument(monumentName);
-        return (monument.excludeWhenPlayerCount != this.game.players.length);
+        this.monument(monumentName).addWorkers(numberOfWorkers);
     }
 
-    addWorkersTo(monumentName, workers)
+    /**
+     * Convenience method to return if a monument is completed.
+     */
+    hasCompleted(monumentName)
     {
-        if( !this.validPlayerCount(monumentName) ) {
-            return; // Invalid player count
-        }
-
-        var monument            = this.monument(monumentName);
-        monument.filledSpaces   = Math.min( monument.totalSpaces, (monument.filledSpaces + workers) );
-        monument.completed      = (monument.filledSpaces == monument.totalSpaces);
-        
-        if( monument.completed ) {
-            monument.completedFirst = true;
-
-            for( var p in this.game.players ) {
-                var otherPlayer = this.game.players[p];
-                if( otherPlayer.playerName != this.player.playerName ) {
-                    if( otherPlayer.monuments.completed(monumentName) ) {
-                        monument.completedFirst = false;
-                        return;
-                    }
-                }
-            }
-        }
+        return this.monument(monumentName).completed;
     }
 
-    allWithWorkers()
-    {
-        var monuments = [];
-        for( var i in this.monuments ) {
-            var monument = this.monuments[i];
-            if( monument.filledSpaces > 0 ) {
-                monuments.push(monument);
-            }
-        }
-        return monuments;
-    }
-
-    totalCompleted()
-    {
-        var totalCompleted = 0;
-        for( var i in this.monuments ) {
-            var monument = this.monuments[i];
-            if( monument.completed ) {
-                totalCompleted++;
-            }
-        }
-        return totalCompleted;
-    }
-
-    completed(monumentName)
-    {
-        var monument = this.monument(monumentName);
-        return monument.completed;
-    }
-
-    incomplete()
+    /**
+     * Return an array of monuments that are not completed for this player, either empty or in progress.
+     */
+    getAllIncomplete()
     {
         var incomplete = [];
         for( var i in this.monuments ) {
             var monument = this.monuments[i];
-            if( this.validPlayerCount(monument.name) && !monument.completed ) {
+            if( !monument.completed && monument.isValid() ) {
                 incomplete.push(monument);
             }
         }
         return incomplete;
     }
 
-    pointsFor(monumentName)
+    /**
+     * Return an array of monuments that currently have workers on them, either in progress or completed.
+     */
+    getAllWithWorkers()
     {
-        var points = 0;
-        var monument = this.monument(monumentName);
-        if( monument.completed ) {
-            points = (monument.completedFirst) ? monument.pointsFirst : monument.pointsNotFirst;
+        var monuments = [];
+        for( var i in this.monuments ) {
+            var monument = this.monuments[i];
+            if( monument.filledSpaces > 0 && monument.isValid() ) {
+                monuments.push(monument);
+            }
         }
-        
-        return points;
+        return monuments;
     }
 
+    /**
+     * Return an array of monuments that are completed.
+     */
+    getAllCompleted()
+    {
+        var completed = [];
+        for( var i in this.monuments ) {
+            var monument = this.monuments[i];
+            if( monument.completed && monument.isValid() ) {
+                completed.push(monument);
+            }
+        }
+        return completed;
+    }
+
+    /**
+     * Return count of total completed monuments.
+     */
+    totalCompleted()
+    {
+        return this.getAllCompleted().length;
+    }
+
+    /**
+     * Total points for all monuments.
+     */
     totalPoints()
     {
         var points = 0;
         for( var i in this.monuments ) {
             var monument = this.monuments[i];
-            points += this.pointsFor(monument.name);
+            points += monument.points;
         }
         return points;
     }
 
+    /**
+     * Debug out the monument information.
+     */
     debug()
     {
         var debug = "Monuments:\n";
-        for( var c in this.monuments ) {
-            var monument = this.monuments[c];
-            if( monument.completed ) {
-                debug += "[X] ";
-            } else { 
-                debug += "[ ] ";
-            }
-            debug += monument.name + " " + monument.filledSpaces + "/" + monument.totalSpaces;
-            debug += "\n";
+        for( var i in this.monuments ) {
+            debug += this.monuments[i].debug();
         }
         console.log(debug);
     }

@@ -14,10 +14,10 @@ var MAX_STAGES                = 9;
 
 class Player
 {
-    constructor(playerName, game)
+    constructor(game, name)
     {
-        this.playerName            = playerName;
         this.game                  = game;
+        this.name                  = name;
         this.lastStageIndex        = 8;
         this.turnStageDescriptions = [
             "Waiting for turn",
@@ -37,17 +37,22 @@ class Player
 
     reset()
     {
-        this.goods               = new Goods(this.game, this);
-        this.cities              = new Cities(this.game, this);
-        this.monuments           = new Monuments(this.game, this);
-        this.developments        = new Developments(this.game, this);
-        this.sellGoods           = {};
-        this.purchaseDevelopment = null;
-        this.turnStage           = 0;
+        this.goods                 = new Goods(this);
+        this.cities                = new Cities(this);
+        this.monuments             = new Monuments(this);
+        this.developments          = new Developments(this);
+        this.goodsToSell           = {};
+        this.developmentToPurchase = null;
+        this.turnStage             = 0;
         
-        this.dice                = null;
-        this.food                = 3;
-        this.disasters           = 0;
+        this.dice                  = null;
+        this.food                  = 3;
+        this.disasters             = 0;
+    }
+
+    log(message)
+    {
+        this.game.log(message);
     }
 
     currentStageDescription()
@@ -57,7 +62,7 @@ class Player
 
     isMyTurn()
     {
-        return (this.game.currentPlayer().playerName == this.playerName);
+        return (this.game.currentPlayer().name == this.name);
     }
 
     isStage( stageName )
@@ -97,6 +102,7 @@ class Player
     {
         this.dice      = null;
         this.turnStage = TURN_STAGE_START;
+        this.log(this.name + "'s Turn.");
     }
 
     rollDice( diceIndices )
@@ -198,7 +204,7 @@ class Player
         } else if( disasterEffect == DISASTER_EFFECT_PESTILENCE ) {
             for( var p in this.game.players ) {
                 var otherPlayer = this.game.players[p];
-                if( otherPlayer.playerName != this.playerName && !otherPlayer.developments.has("Medicine") ) {
+                if( otherPlayer.name != this.name && !otherPlayer.developments.has("Medicine") ) {
                     otherPlayer.disasters += 3;
                 }
             }
@@ -209,7 +215,7 @@ class Player
         } else if( disasterEffect == DISASTER_EFFECT_REVOLT_WITH_RELIGION ) {
             for( var p in this.game.players ) {
                 var otherPlayer = this.game.players[p];
-                if( otherPlayer.playerName != this.playerName ) {
+                if( otherPlayer.name != this.name ) {
                     otherPlayer.goods.reset();
                 }
             }
@@ -247,38 +253,36 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_WORKERS]) ) { return; }
 
-        this.sellGoods           = {};
-        this.purchaseDevelopment = null;
+        this.goodsToSell           = {};
+        this.developmentToPurchase = null;
 
         this.turnStage = TURN_STAGE_PURCHASE;
     }
 
-    totalAvailableCoins()
+    totalCoinsFromGoodsSold()
     {
-        var total = this.dice.totalCoins();
-        for( var i in this.sellGoods ) {
-            if(this.sellGoods[i]) {
-                total += this.goods.valueOf(i);
+        var total = 0;
+        for( var goodType in this.goodsToSell ) {
+            if(this.goodsToSell[goodType]) {
+                total += this.goods.valueOf(goodType);
             }
         }
-        return total;   
+        return total;
     }
 
-    canPurchaseDevelopment()
+    totalAvailableCoins()
     {
-        if( this.purchaseDevelopment ) {
-            var development = this.developments.development(this.purchaseDevelopment);
-            return (!development.purchased && development.cost <= this.totalAvailableCoins());
-        }
-        return false;
+        if( !this.isMyTurn() ) { return 0; }
+
+        return this.dice.totalCoins() + this.totalCoinsFromGoodsSold();
     }
 
     selectDevelopment( development )
     {
-        if( this.purchaseDevelopment == development.name ) {
-            this.purchaseDevelopment = null;
+        if( this.developmentToPurchase == development.name ) {
+            this.developmentToPurchase = null;
         } else {
-            this.purchaseDevelopment = development.name;
+            this.developmentToPurchase = development.name;
         }
     }
 
@@ -287,19 +291,26 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_PURCHASE]) ) { return; }
 
-        if( this.canPurchaseDevelopment() ) {
-            var availableCoins = this.totalAvailableCoins();
-            var purchased      = this.developments.purchase(this.purchaseDevelopment, availableCoins);
-
-            if( purchased ) {
-                this.dice.takeCoins();
-                for( var i in this.sellGoods ) {
-                    this.goods.emptyGood(i);
-                }
+        if( this.developmentToPurchase ) {
+            var development = this.developments.development(this.developmentToPurchase);
+            if( development.isPurchaseable() ) {
+                development.purchase();
             }
         }
-        
+
         this.purchaseCompleted();
+    }
+
+    useAvailableCoins()
+    {
+        this.dice.takeCoins();
+
+        for( var goodType in this.goodsToSell ) {
+            if( this.goodsToSell[goodType] ) {
+                this.game.log( goodType + ": Selling for " + this.goods.valueOf(goodType) + " coins." );
+                this.goods.emptyGood(goodType);
+            }
+        }
     }
 
     purchaseCompleted()
@@ -307,8 +318,8 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_PURCHASE]) ) { return; }
 
-        this.sellGoods           = {};
-        this.purchaseDevelopment = null;
+        this.goodsToSell           = {};
+        this.developmentToPurchase = null;
 
         if( this.goods.total() > 6 && !this.developments.has("Caravans") ) {
             this.turnStage = TURN_STAGE_DISCARD;
@@ -322,7 +333,7 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_DISCARD]) ) { return; }
 
-        for( var i in this.sellGoods ) {
+        for( var i in this.goodsToSell ) {
             this.goods.emptyGood(i);
         }
 
@@ -370,7 +381,7 @@ class Player
 
     debug()
     {
-        console.log("Player State Debug for: " + this.playerName);
+        console.log("Player State Debug for: " + this.name);
         console.log("Stage: " + this.currentStageDescription());
 
         this.cities.debug();

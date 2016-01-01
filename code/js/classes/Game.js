@@ -15,16 +15,23 @@ class Game
 
     newGame()
     {
+        this.logs               = new Logs(this);
         this.players            = [];
+        this.error              = null;
         this.currentPlayerIndex = null;
         this.started            = false;
         this.addPlayer();
     }
 
+    log(message)
+    {
+        this.logs.add(message);
+    }
+
     addPlayer()
     {
         if( !this.started ) {
-            var player = new Player( "Player " + (this.players.length+1), this );
+            var player = new Player( this, "Player " + (this.players.length+1) );
             this.players.push( player );
             return player;
         }
@@ -42,21 +49,37 @@ class Game
         return this.players[this.currentPlayerIndex];
     }
 
+    otherPlayers(fromPlayer)
+    {
+        var otherPlayers = [];
+        for( var i in this.players ) {
+            var player = this.players[i];
+            if( player.name != fromPlayer.name ) {
+                otherPlayers.push(player);
+            }
+        }
+        return otherPlayers;
+    }
+
     start()
     {
         if( !this.started ) {
             for( var p1 in this.players ) {
                 for( var p2 in this.players ) {
-                    if( p1 != p2 && this.players[p1].playerName == this.players[p2].playerName ) {
-                        alert("All players must have different names.");
-                        return;
+                    if( p1 != p2 && this.players[p1].name == this.players[p2].name ) {
+                        throw "All players must have different names.";
                     }
                 }
             }
 
+            this.log("Game Started. Randomizing Turn Order.");
             this.started = true;
             
             arrayShuffle(this.players); // Randomly assign turn order
+
+            for( var p in this.players ) {
+                this.log( p + ") " + this.players[p].name );
+            }
 
             this.currentPlayerIndex = 0;
             this.currentPlayer().startTurn();

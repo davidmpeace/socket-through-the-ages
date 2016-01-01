@@ -1,10 +1,10 @@
 "use strict";
 class Goods
 {
-    constructor(game, player)
+    constructor(player)
     {
-        this.game   = game;
         this.player = player;
+        this.game   = player.game;
         this.goodTypes          = ['wood','stone','pottery','cloth','spearhead'];
         this.goodTypesReversed  = ['spearhead','cloth','pottery','stone','wood'];
         this.goodTypeColors = {

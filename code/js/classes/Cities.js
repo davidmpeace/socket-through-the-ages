@@ -1,10 +1,10 @@
 "use strict";
 class Cities
 {
-    constructor(game, player)
+    constructor(player)
     {
-        this.game   = game;
         this.player = player;
+        this.game   = player.game;
         this.reset();
     }
 
