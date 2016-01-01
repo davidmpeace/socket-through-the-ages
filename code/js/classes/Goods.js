@@ -58,6 +58,12 @@ class Goods
         return totalValue;
     }
 
+    isSelected(goodType)
+    {
+        var selectedGoodIndex = this.selectedGoodsForCoins.indexOf(goodType);
+        return (selectedGoodIndex > -1);
+    }
+
     emptyGoodsForTypes( goodTypes )
     {
         for( var i in goodTypes ) {
@@ -85,6 +91,8 @@ class Goods
         var totalGoodsValue = 0;
         for( var goodType in this.goods ) {
             var goodCount   = this.goods[goodType];
+            // console.log(goodCount);
+            // console.log(goodType);
             var valueOfGood = this.goodValues[goodType][goodCount];
             totalGoodsValue += parseInt(valueOfGood);
         }

@@ -55,6 +55,15 @@ body
     margin-bottom: 10px;
 }
 
+.leadership
+{
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    padding:10px;
+    margin-bottom: 5px;
+}
+
 .diceContainer 
 {
     display: inline-block;
@@ -77,7 +86,6 @@ body
 .dice.skull
 {
     background-color: #edafa8;
-    border: 2px solid #f00;
 }
 
 .dice.keep
@@ -182,4 +190,44 @@ body
 {
     width: 33%;
     padding: 3px;
+}
+
+.applyWorkers
+{
+    width: 100%;
+    margin-top: 20px;
+}
+.applyWorkers tr td
+{
+    text-align: left;
+    padding: 3px;
+}
+
+.applyWorkers tr td:first-child
+{
+    width: 35%;
+}
+
+.purchaseDevelopment label
+{
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.purchaseDevelopment
+{
+    width: 100%;
+    margin-top: 20px;
+}
+
+.purchaseDevelopment td, .purchaseDevelopment th
+{
+    padding: 2px;
+    text-align: left;
+}
+
+.purchaseDevelopment tr.development:hover
+{
+    background-color: #eee;
+    cursor: pointer; 
 }

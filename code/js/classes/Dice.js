@@ -81,8 +81,11 @@ class Dice
             
             this.rollsCompleted++;
 
+            if( this.isAllSkulls() ) {
+                this.rollsCompleted = MAX_ROLLS; // Set to max rolls if all are skulls
+            }
+
             this.canRoll = (this.rollsCompleted < MAX_ROLLS);
-            console.log(this.rollsCompleted, MAX_ROLLS);
         }
     }
 
@@ -91,7 +94,7 @@ class Dice
         if( this.diceFinalized ) { return false; }
 
         if( this.canRollLeadershipDie() ) {
-            rolledIndex = Math.floor(Math.random() * 6);
+            var rolledIndex = Math.floor(Math.random() * 6);
             this.dice[diceIndex] = this.diceSides[rolledIndex];
             this.rollsCompleted++;
         }
@@ -100,6 +103,17 @@ class Dice
     hasOptionalDice()
     {
         return (this.totalOptionalFood() > 0 || this.totalOptionalWorkers() > 0);
+    }
+
+    hasVariableDice()
+    {
+        for( var i in this.dice ) {
+            var die = this.dice[i];
+            if( die == DICE_2_FOOD_OR_2_WORKERS ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     toggleType(diceIndex)
@@ -263,6 +277,11 @@ class Dice
     totalSkulls()
     {
         return this.total('SKULLS');
+    }
+
+    isAllSkulls()
+    {
+        return (this.totalSkulls() == this.dice.length);
     }
 
     disasterType()

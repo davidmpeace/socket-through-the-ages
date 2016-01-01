@@ -108,6 +108,18 @@ class Monuments
         return monument.completed;
     }
 
+    incomplete()
+    {
+        var incomplete = [];
+        for( var i in this.monuments ) {
+            var monument = this.monuments[i];
+            if( this.validPlayerCount(monument.name) && !monument.completed ) {
+                incomplete.push(monument);
+            }
+        }
+        return incomplete;
+    }
+
     pointsFor(monumentName)
     {
         var points = 0;

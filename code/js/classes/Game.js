@@ -55,13 +55,18 @@ class Game
             }
 
             this.started = true;
-            // Randomly assign turn order
-            arrayShuffle(this.players);
+            
+            arrayShuffle(this.players); // Randomly assign turn order
 
             this.currentPlayerIndex = 0;
-
-            this.players[0].startTurn();
+            this.currentPlayer().startTurn();
         }
+    }
+
+    nextPlayersTurn()
+    {
+        this.currentPlayerIndex = (this.currentPlayerIndex == this.players.length-1) ? 0 : this.currentPlayerIndex + 1;
+        this.currentPlayer().startTurn();
     }
 
     maxFood()

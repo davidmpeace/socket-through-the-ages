@@ -37,15 +37,17 @@ class Player
 
     reset()
     {
-        this.goods          = new Goods(this.game, this);
-        this.cities         = new Cities(this.game, this);
-        this.monuments      = new Monuments(this.game, this);
-        this.developments   = new Developments(this.game, this);
-        this.turnStage      = 0;
+        this.goods               = new Goods(this.game, this);
+        this.cities              = new Cities(this.game, this);
+        this.monuments           = new Monuments(this.game, this);
+        this.developments        = new Developments(this.game, this);
+        this.sellGoods           = {};
+        this.purchaseDevelopment = null;
+        this.turnStage           = 0;
         
-        this.dice           = null;
-        this.food           = 3;
-        this.disasters      = 0;
+        this.dice                = null;
+        this.food                = 3;
+        this.disasters           = 0;
     }
 
     currentStageDescription()
@@ -93,6 +95,7 @@ class Player
 
     startTurn()
     {
+        this.dice      = null;
         this.turnStage = TURN_STAGE_START;
     }
 
@@ -112,7 +115,7 @@ class Player
             if( this.dice.canRollLeadershipDie() ) {
                 this.turnStage = TURN_STAGE_LEADERSHIP;
             } else {
-                this.turnStage = TURN_STAGE_ROLL_COMPLETE;
+                this.rollComplete();
             }
         }
     }
@@ -123,7 +126,23 @@ class Player
         if( !this.isInOneOfStages([TURN_STAGE_LEADERSHIP]) ) { return; }
 
         this.dice.rollLeadershipDice(diceIndex);
+        this.rollComplete();
+    }
+
+    rollComplete()
+    {
         this.turnStage = TURN_STAGE_ROLL_COMPLETE;
+
+        if( !this.dice.hasVariableDice() ) {
+            this.finalizeDice();
+        }
+    }
+
+    canFinalizeDice()
+    {
+        if( !this.isMyTurn() ) { return false; }
+        if( !this.isInOneOfStages([TURN_STAGE_ROLLING, TURN_STAGE_LEADERSHIP, TURN_STAGE_ROLL_COMPLETE]) ) { return false; }
+        return true;
     }
 
     finalizeDice()
@@ -133,6 +152,7 @@ class Player
 
         if( this.dice.finalizeDice() ) {
             this.turnStage = TURN_STAGE_DICE_FINALIZED;
+            this.collectGoodsAndFood();
         }
     }
 
@@ -149,8 +169,6 @@ class Player
 
         this.feedCities();
         this.resolveDisasters();
-
-        this.turnStage = TURN_STAGE_WORKERS;
     }
 
     feedCities()
@@ -198,6 +216,14 @@ class Player
         }
     }
 
+    moveToWorkersStage()
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_DICE_FINALIZED]) ) { return; }
+
+        this.turnStage = TURN_STAGE_WORKERS;
+    }
+
     applyWorkersToCities( totalWorkers )
     {
         if( !this.isMyTurn() ) { return; }
@@ -221,34 +247,92 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_WORKERS]) ) { return; }
 
+        this.sellGoods           = {};
+        this.purchaseDevelopment = null;
+
         this.turnStage = TURN_STAGE_PURCHASE;
     }
 
-    purchaseDevelopment( developmentName )
+    totalAvailableCoins()
+    {
+        var total = this.dice.totalCoins();
+        for( var i in this.sellGoods ) {
+            if(this.sellGoods[i]) {
+                total += this.goods.valueOf(i);
+            }
+        }
+        return total;   
+    }
+
+    canPurchaseDevelopment()
+    {
+        if( this.purchaseDevelopment ) {
+            var development = this.developments.development(this.purchaseDevelopment);
+            return (!development.purchased && development.cost <= this.totalAvailableCoins());
+        }
+        return false;
+    }
+
+    selectDevelopment( development )
+    {
+        if( this.purchaseDevelopment == development.name ) {
+            this.purchaseDevelopment = null;
+        } else {
+            this.purchaseDevelopment = development.name;
+        }
+    }
+
+    sellThenPurchaseSelected()
     {
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_PURCHASE]) ) { return; }
 
-        if( developmentName.length > 0 ) {
-            var availableCoins = this.totalForCoinDicePlusSelectedGoods();
-            var purchased = this.developments.purchase(developmentName, availableCoins);
+        if( this.canPurchaseDevelopment() ) {
+            var availableCoins = this.totalAvailableCoins();
+            var purchased      = this.developments.purchase(this.purchaseDevelopment, availableCoins);
 
             if( purchased ) {
                 this.dice.takeCoins();
+                for( var i in this.sellGoods ) {
+                    this.goods.emptyGood(i);
+                }
             }
         }
-     
-        this.turnStage = TURN_STAGE_DISCARD;
+        
+        this.purchaseCompleted();
     }
 
-    completeTurn( discardGoods )
+    purchaseCompleted()
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_PURCHASE]) ) { return; }
+
+        this.sellGoods           = {};
+        this.purchaseDevelopment = null;
+
+        if( this.goods.total() > 6 && !this.developments.has("Caravans") ) {
+            this.turnStage = TURN_STAGE_DISCARD;
+        } else {
+            this.completeTurn();
+        }
+    }
+
+    discardGoods()
     {
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_DISCARD]) ) { return; }
 
-        if( discardGoods && discardGoods.length > 0 ) {
-            this.goods.emptyGoodsForTypes( discardGoods );
+        for( var i in this.sellGoods ) {
+            this.goods.emptyGood(i);
         }
+
+        this.completeTurn();
+    }
+
+    completeTurn()
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_PURCHASE, TURN_STAGE_DISCARD]) ) { return; }
 
         if( this.goods.total() > 6 && !this.developments.has("Caravans") ) {
             alert("Must discard goods to be 6 or less.  Get Caravans next time!");
@@ -256,12 +340,7 @@ class Player
         }
 
         this.turnStage = TURN_STAGE_WAITING;
-    }
-
-    totalForCoinDicePlusSelectedGoods()
-    {
-        return (this.dice.useableCoins + this.goods.totalValueForSelectedGoods());
-
+        this.game.nextPlayersTurn();
     }
 
     developmentPoints()

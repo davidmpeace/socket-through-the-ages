@@ -95,6 +95,19 @@ class Developments
         return this.allPurchased().length;
     }
 
+    purchaseable()
+    {
+        var purchaseable = [];
+        var totalAvailableCoins = this.player.totalAvailableCoins();
+        for( var i in this.developments ) {
+            var development = this.developments[i];
+            if( !development.purchased && development.cost <= this.player.totalAvailableCoins() ) {
+                purchaseable.push(development);
+            }
+        }
+        return purchaseable;
+    }
+
     bonusPointsFor(developmentName)
     {
         var bonusPoints = 0;
