@@ -32,6 +32,14 @@ class Good
     }
 
     /**
+     * Remove a specific amount of a good.
+     */
+    remove(amount)
+    {
+        this.quantity = Math.min( 0, (this.quantity - amount) );
+    }
+
+    /**
      * Discard all of this good
      */
     discard()

@@ -90,11 +90,11 @@
                                 <div class='row'>
                                     
                                     <div class='col-xs-3'>
-                                        <strong>Food:</strong> {{currentPlayer.dice.totalFixedFood()}}<span ng-if="currentPlayer.dice.totalOptionalFood() > 0">-{{currentPlayer.dice.totalFixedFood() + currentPlayer.dice.totalOptionalFood()}}</span>
+                                        <strong>Food:</strong> {{currentPlayer.dice.totalFood()}}<span ng-if="currentPlayer.dice.totalOptionalFood() > 0">-{{currentPlayer.dice.totalFood() + currentPlayer.dice.totalOptionalFood()}}</span>
                                     </div>
 
                                     <div class='col-xs-3'>
-                                        <strong>Workers:</strong> {{currentPlayer.dice.totalFixedWorkers()}}<span ng-if="currentPlayer.dice.totalOptionalWorkers() > 0">-{{currentPlayer.dice.totalFixedWorkers() + currentPlayer.dice.totalOptionalWorkers()}}</span>
+                                        <strong>Workers:</strong> {{currentPlayer.dice.totalWorkers()}}<span ng-if="currentPlayer.dice.totalOptionalWorkers() > 0">-{{currentPlayer.dice.totalWorkers() + currentPlayer.dice.totalOptionalWorkers()}}</span>
                                     </div>
 
                                     <div class='col-xs-3'>
@@ -113,11 +113,11 @@
                                     <div class='bg-success leadership' ng-if="currentPlayer.isStage('TURN_STAGE_LEADERSHIP')">LEADERSHIP: Click a dice to re-roll, or click Done.</div>
                                     <div class='col-xs-10' style='text-align:center'>
                                         <div ng-repeat='dice in currentPlayer.dice.dice track by $index' class='diceContainer' style='vertical-align: top'>
-                                            <div ng-click="diceClicked($index)" class='dice' ng-class="{'skull': (dice == '1_SKULL_AND_2_GOODS'), 'choice': canClickDice(dice), 'unset': (dice == '2_FOOD_OR_2_WORKERS'), 'keep': currentPlayer.isStage('TURN_STAGE_ROLLING') && ((currentPlayer.dice.diceToKeep.indexOf($index) > -1) || (dice == '1_SKULL_AND_2_GOODS'))}">
-                                                <img ng-src='img/{{dice}}.png'  />
+                                            <div ng-click="diceClicked($index)" class='dice' ng-class="{'skull': dice.isSkull, 'choice': canClickDice(dice), 'unset': (dice.face == '2_FOOD_OR_2_WORKERS'), 'keep': currentPlayer.isStage('TURN_STAGE_ROLLING') && (dice.keep || dice.isSkull)}">
+                                                <img ng-src='img/{{dice.face}}.png'  />
                                             </div>
                                             
-                                            <button class='btn btn-primary btn-xs' ng-if="dice.charAt(0) == '2' && !currentPlayer.dice.diceFinalized" ng-click="toggleType($index)">Change</button>
+                                            <button class='btn btn-primary btn-xs' ng-if="dice.variable && !currentPlayer.dice.diceFinalized" ng-click="toggleType($index)">Change</button>
                                         </div>
                                     </div>
 
@@ -133,7 +133,7 @@
                                     <div class='col-xs-12 text-center'>
                                         <br/>
                                         <strong>Collect Food &amp; Goods, then Resolve Disasters:</strong></br>
-                                        +{{currentPlayer.dice.totalFixedFood()}} Food from Dice<br/>
+                                        +{{currentPlayer.dice.totalFood()}} Food from Dice<br/>
                                         -{{currentPlayer.cities.totalCompleted()}} Food from feeding Cities <span ng-if="currentPlayer.dice.resultingFamines>0" class='bg-danger'>(+{{currentPlayer.dice.resultingFamines}} Famine Disasters)</span><br/>
                                         +{{currentPlayer.dice.totalGoods()}} Goods<br/>
                                         <span ng-if="currentPlayer.dice.disasterType() && currentPlayer.dice.disasterType() != 'None'" class='bg-danger'>
@@ -151,14 +151,24 @@
                                     <div class='col-xs-12 text-center'>
                                         <br/>
                                         <strong>Collect &amp; Place Workers:</strong></br>
-                                        +{{currentPlayer.dice.totalFixedWorkers()}} Workers from Dice<br/>
+                                        +{{currentPlayer.dice.totalWorkers()}} Workers from Dice<br/>
 
-                                        <div ng-if="currentPlayer.dice.totalFixedWorkers() > 0" class=''>
+
+                                        <span ng-show="currentPlayer.developments.has('Engineering')">
+                                                <strong>ENGINEERING:</strong>
+                                                Sell 
+                                                <select ng-model="currentPlayer.stoneToSell" class="control form-control input-sm" style="width: 70px; display: inline-block;">
+                                                    <option value='{{$index}}' ng-selected="currentPlayer.stoneToSell == $index" ng-repeat="i in toArray(currentPlayer.goods.good('stone').quantity+1) track by $index">{{$index}}</option>
+                                                </select> Stone for +{{currentPlayer.stoneToSell * 3}} Workers.
+                                            <br/>
+                                        </span>
+
+                                        <div ng-if="currentPlayer.dice.totalWorkers() > 0 || currentPlayer.workersFromStone() > 0" class=''>
                                             <table class='applyWorkers'>
                                                 <tr>
                                                     <th>Apply To</th>
                                                     <th>Spaces</th>
-                                                    <th>{{currentPlayer.dice.totalFixedWorkers() - usedWorkers()}} Workers to Use</th>
+                                                    <th>{{currentPlayer.dice.totalWorkers() + currentPlayer.workersFromStone() - usedWorkers()}} Workers to Use</th>
                                                 </tr>
                                                 <tr ng-hide="currentPlayer.cities.full()">
                                                     <td>Cities</td>
@@ -186,7 +196,7 @@
                                     <div class='col-xs-12 text-center'>
                                         <br/>
                                         <strong>Purchase Development:</strong></br>
-                                        +{{currentPlayer.dice.totalCoins()}} Coins from Dice<br/>
+                                        
                                         <span ng-repeat="good in currentPlayer.goods.goods" ng-hide="good.quantity == 0">
                                             <label>
                                                 <input type='checkbox' ng-model="good.selectedToSell" /> 
@@ -194,6 +204,16 @@
                                             </label>
                                             <br/>
                                         </span>
+                                        
+                                        <span ng-show="currentPlayer.developments.has('Granaries')">
+                                                <strong>GRANARIES:</strong>
+                                                Sell 
+                                                <select ng-model="currentPlayer.foodToSell" class="control form-control input-sm" style="width: 70px; display: inline-block;">
+                                                    <option value='{{$index}}' ng-selected="currentPlayer.foodToSell == $index" ng-repeat="i in toArray(currentPlayer.food+1) track by $index">{{$index}}</option>
+                                                </select> Food for +{{currentPlayer.foodToSell * 4}} coins.
+                                            <br/>
+                                        </span>
+                                        +{{currentPlayer.dice.totalCoins()}} Coins from Dice<br/>
                                         <br/>
                                         <strong>{{currentPlayer.totalAvailableCoins()}} Coins Available</strong>
                                         <br/>
@@ -539,7 +559,7 @@
                 if( $scope.currentPlayer.isStage('TURN_STAGE_ROLLING') ) {
                     $scope.currentPlayer.dice.toggleKeep(diceIndex);
                 } else if( $scope.currentPlayer.isStage('TURN_STAGE_LEADERSHIP') ) {
-                    $scope.currentPlayer.rollLeadershipDice(diceIndex);
+                    $scope.currentPlayer.rollLeadershipDie(diceIndex);
                 }
             }
 
@@ -585,7 +605,7 @@
 
             $scope.unusedWorkers = function()
             {
-                return $scope.currentPlayer.dice.totalFixedWorkers() - $scope.usedWorkers();
+                return $scope.currentPlayer.dice.totalWorkers() + $scope.currentPlayer.workersFromStone() - $scope.usedWorkers();
             }
 
             $scope.workersDone = function()

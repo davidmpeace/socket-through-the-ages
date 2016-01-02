@@ -42,6 +42,8 @@ class Player
         this.monuments             = new Monuments(this);
         this.developments          = new Developments(this);
         this.developmentToPurchase = null;
+        this.foodToSell            = 0;
+        this.stoneToSell           = 0;
         this.turnStage             = 0;
         
         this.dice                  = null;
@@ -104,17 +106,17 @@ class Player
         this.log(this.name + "'s Turn.");
     }
 
-    rollDice( diceIndices )
+    rollDice()
     {
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_START, TURN_STAGE_ROLLING]) ) { return; }
 
         if( this.turnStage == TURN_STAGE_START) {
-            this.dice      = new Dice(this.game, this);
+            this.dice      = new Dice( this, this.cities.totalCompleted() );
             this.turnStage = TURN_STAGE_ROLLING;
         }
 
-        this.dice.roll(diceIndices);
+        this.dice.roll();
 
         if( !this.dice.canRoll ) {
             if( this.dice.canRollLeadershipDie() ) {
@@ -125,12 +127,12 @@ class Player
         }
     }
 
-    rollLeadershipDice( diceIndex )
+    rollLeadershipDie( dieIndex )
     {
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_LEADERSHIP]) ) { return; }
 
-        this.dice.rollLeadershipDice(diceIndex);
+        this.dice.rollLeadershipDie(dieIndex);
         this.rollComplete();
     }
 
@@ -138,16 +140,18 @@ class Player
     {
         this.turnStage = TURN_STAGE_ROLL_COMPLETE;
 
-        if( !this.dice.hasVariableDice() ) {
+        if( !this.dice.hasOptionalDice() ) {
             this.finalizeDice();
         }
     }
 
     canFinalizeDice()
     {
-        if( !this.isMyTurn() ) { return false; }
-        if( !this.isInOneOfStages([TURN_STAGE_ROLLING, TURN_STAGE_LEADERSHIP, TURN_STAGE_ROLL_COMPLETE]) ) { return false; }
-        return true;
+        if( this.isMyTurn() && this.isInOneOfStages([TURN_STAGE_ROLLING, TURN_STAGE_LEADERSHIP, TURN_STAGE_ROLL_COMPLETE]) ) { 
+            return true; 
+        }
+
+        return false;
     }
 
     finalizeDice()
@@ -158,6 +162,10 @@ class Player
         if( this.dice.finalizeDice() ) {
             this.turnStage = TURN_STAGE_DICE_FINALIZED;
             this.collectGoodsAndFood();
+
+            this.developmentToPurchase = null;
+            this.foodToSell            = 0;
+            this.stoneToSell           = 0;
         }
     }
 
@@ -233,6 +241,11 @@ class Player
         this.turnStage = TURN_STAGE_WORKERS;
     }
 
+    workersFromStone()
+    {
+        return (this.stoneToSell * 3);
+    }
+
     applyWorkersToCities( totalWorkers )
     {
         if( !this.isMyTurn() ) { return; }
@@ -256,7 +269,9 @@ class Player
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_WORKERS]) ) { return; }
 
-        this.developmentToPurchase = null;
+        if( this.stoneToSell > 0 ) {
+            this.goods.good('stone').remove(this.stoneToSell);
+        }
 
         this.turnStage = TURN_STAGE_PURCHASE;
     }
@@ -265,7 +280,12 @@ class Player
     {
         if( !this.isMyTurn() ) { return 0; }
 
-        return this.dice.totalCoins() + this.goods.totalValueForSelectedGoods();
+        var foodCoins = 0;
+        if( this.developments.has("Granaries") && this.foodToSell >= 0 && this.foodToSell <= this.food ) {
+            foodCoins = (this.foodToSell * 4);
+        }
+
+        return this.dice.totalCoins() + this.goods.totalValueForSelectedGoods() + foodCoins;
     }
 
     selectDevelopment( development )
@@ -295,6 +315,9 @@ class Player
     useAvailableCoins()
     {
         this.dice.takeCoins();
+        if( this.foodToSell > 0 ) {
+            this.food -= this.foodToSell;
+        }
 
         var selectedGoods = this.goods.selectedGoodsToSell();
         for( var i in selectedGoods ) {

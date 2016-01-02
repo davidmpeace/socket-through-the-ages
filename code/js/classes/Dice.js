@@ -1,14 +1,5 @@
 "use strict";
 
-var DICE_3_FOOD              = "3_FOOD";
-var DICE_3_WORKERS           = "3_WORKERS";
-var DICE_2_FOOD_OR_2_WORKERS = "2_FOOD_OR_2_WORKERS";
-var DICE_2_FOOD              = "2_FOOD";
-var DICE_2_WORKERS           = "2_WORKERS";
-var DICE_1_GOOD              = "1_GOOD";
-var DICE_1_SKULL_AND_2_GOODS = "1_SKULL_AND_2_GOODS";
-var DICE_COINS               = "COINS";
-
 var DISASTER_TYPE_NONE       = "None";
 var DISASTER_TYPE_DROUGHT    = "Drought";
 var DISASTER_TYPE_PESTILENCE = "Pestilence";
@@ -26,27 +17,17 @@ var DISASTER_EFFECT_REVOLT_WITH_RELIGION     = "Opponents Lose all Goods";
 
 class Dice
 {
-    constructor(game, player)
+    constructor(player, numberOfDie)
     {
-        this.game           = game;
+        this.game           = player.game;
         this.player         = player;
-        this.totalDie       = this.player.cities.totalCompleted();
+
         this.dice = [];
-        for( var i = 0; i < this.totalDie; i++ ) {
-            this.dice.push( null );
+        for( var i = 0; i < numberOfDie; i++ ) {
+            this.dice.push( new Die(this) );
         }
 
         this.rollsCompleted = 0;
-        this.diceSides      = [
-            DICE_3_FOOD,
-            DICE_3_WORKERS,
-            DICE_1_GOOD,
-            DICE_2_FOOD_OR_2_WORKERS,
-            DICE_COINS,
-            DICE_1_SKULL_AND_2_GOODS
-        ];
-
-        this.diceToKeep = [];
 
         this.canRoll        = true;
         this.diceFinalized  = false; // Set to true when all rolling is done, and food\worker combos have been chosen.
@@ -59,89 +40,78 @@ class Dice
         this.resultingFamines = 0;
     }
 
+    /**
+     * Returns true if it's the last roll, and they have the Leadership development
+     */
     canRollLeadershipDie()
     {
-        if( this.diceFinalized ) { return false; }
-
-        return (this.rollsCompleted == MAX_ROLLS && this.player.developments.has("Leadership"));
+        return (this.rollsCompleted == MAX_ROLLS && this.player.developments.has("Leadership") && !this.diceFinalized);
     }
 
+    /**
+     * Rolls all unkept, and non-skull die
+     */
     roll()
     {
-        if( this.diceFinalized ) { return false; }
-
-        if( this.canRoll ) {
-            var rolledIndex;
-            for( var i = 0; i < this.totalDie; i++ ) {
-                if( this.diceToKeep.indexOf(i) == -1 && this.dice[i] != DICE_1_SKULL_AND_2_GOODS ) {
-                    rolledIndex = Math.floor(Math.random() * 6);
-                    this.dice[i] = this.diceSides[rolledIndex];
+        if( !this.diceFinalized && this.canRoll ) {
+            
+            for( var i in this.dice ) {
+                var die = this.dice[i];
+                if( !die.keep && !die.isSkull ) {
+                    die.roll();
                 }
             }
             
             this.rollsCompleted++;
 
             if( this.isAllSkulls() ) {
-                this.rollsCompleted = MAX_ROLLS; // Set to max rolls if all are skulls
+                this.rollsCompleted = MAX_ROLLS; // Set to max rolls if all are skulls, because there's nothing more to do
             }
 
             this.canRoll = (this.rollsCompleted < MAX_ROLLS);
         }
     }
 
-    rollLeadershipDice(diceIndex)
+    /**
+     * Rolls 1 die for the leadership roll
+     */
+    rollLeadershipDie(dieIndex)
     {
         if( this.diceFinalized ) { return false; }
 
-        if( this.canRollLeadershipDie() ) {
-            var rolledIndex = Math.floor(Math.random() * 6);
-            this.dice[diceIndex] = this.diceSides[rolledIndex];
-            this.rollsCompleted++;
-        }
+        this.dice[dieIndex].roll();
+        this.rollsCompleted++;
     }
 
+    /**
+     * Returns true if there are any dice that do not have their value chosen yet
+     */
     hasOptionalDice()
     {
         return (this.totalOptionalFood() > 0 || this.totalOptionalWorkers() > 0);
     }
 
-    hasVariableDice()
-    {
-        for( var i in this.dice ) {
-            var die = this.dice[i];
-            if( die == DICE_2_FOOD_OR_2_WORKERS ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    toggleType(diceIndex)
+    /**
+     * Toggle the type for a variable dice (2 Food/2 Workers).
+     */
+    toggleType(dieIndex)
     {
         if( this.diceFinalized ) { return false; }
-
-        var diceValue = this.dice[diceIndex];
-        if( diceValue == '2_FOOD_OR_2_WORKERS' ) {
-            this.dice[diceIndex] = '2_FOOD';
-        } else if( diceValue == '2_FOOD' ) {
-            this.dice[diceIndex] = '2_WORKERS';
-        } else if( diceValue == '2_WORKERS' ) {
-            this.dice[diceIndex] = '2_FOOD_OR_2_WORKERS';
-        }
+        this.dice[dieIndex].toggleType();
     }
 
-    toggleKeep(diceIndex)
+    /**
+     * Toggle whether a die should be kept or not
+     */
+    toggleKeep(dieIndex)
     {
         if( !this.canRoll || this.diceFinalized ) { return false; }
-
-        var diceToKeepIndex = this.diceToKeep.indexOf(diceIndex);
-        if( diceToKeepIndex > -1 ) {
-            this.diceToKeep.splice(diceToKeepIndex, 1);
-        } else {
-            this.diceToKeep.push(diceIndex);
-        }
+        this.dice[dieIndex].toggleKeep();
     }
 
+    /**
+     * Called when done rolling, and all variable dice have been chosen.
+     */
     finalizeDice()
     {
         if( this.diceFinalized ) { return false; }
@@ -151,8 +121,8 @@ class Dice
             return false;
         }
 
-        this.useableFood    = this.totalFixedFood();
-        this.useableWorkers = this.totalFixedWorkers();
+        this.useableFood    = this.totalFood();
+        this.useableWorkers = this.totalWorkers();
         this.useableGoods   = this.totalGoods();
         this.useableCoins   = this.totalCoins();
 
@@ -189,94 +159,70 @@ class Dice
         this.useableCoins = 0;
         return total;
     }
-
-    total(type, dieFace)
+ 
+    totalFood()
     {
-        var total = 0;
+        var food = 0;
         for( var i in this.dice ) {
-            var die = this.dice[i];
-
-            var chosenSide = false;
-            if( (dieFace == DICE_3_FOOD && die == DICE_2_FOOD) || (dieFace == DICE_3_WORKERS && die == DICE_2_WORKERS) ) {
-                chosenSide = true;
-            }
-
-            if( typeof dieFace == "undefined" || die == dieFace || chosenSide ) {
-                if( type == 'FOOD' ) {
-                    if( die == DICE_3_FOOD || die == DICE_2_FOOD_OR_2_WORKERS || die == DICE_2_FOOD ) {
-                        total += (die == DICE_3_FOOD) ? 3 : 2;
-
-                        if( this.player.developments.has("Agriculture") ) {
-                            total += 1;
-                        }
-                    }
-                } else if( type == 'WORKERS' ) {
-                    if( die == DICE_3_WORKERS || die == DICE_2_FOOD_OR_2_WORKERS || die == DICE_2_WORKERS ) {
-                        total += (die == DICE_3_WORKERS) ? 3 : 2;
-
-                        if( this.player.developments.has("Masonry") ) {
-                            total += 1;
-                        }
-                    }
-                } else if( type == 'GOODS') {
-                    if( die == DICE_1_GOOD || die == DICE_1_SKULL_AND_2_GOODS ) {
-                        if( this.total("SKULLS") >= 5 && !this.player.developments.has("Religion") ) {
-                            total = 0;
-                        } else {
-                            total += (die == DICE_1_SKULL_AND_2_GOODS) ? 2 : 1;
-                        }
-                    }
-                } else if( type == 'COINS') {
-                    if( die == DICE_COINS ) {
-                        total += 7;
-
-                        if( this.player.developments.has("Coinage") ) {
-                            total += 5;
-                        }
-                    }
-                } else if( type == 'SKULLS') {
-                    if( die == DICE_1_SKULL_AND_2_GOODS ) {
-                        total += 1;
-                    }
-                }
-            }
+            food += this.dice[i].food();
         }
-        return total;
-    }
-
-    totalFixedFood()
-    {
-        return this.total('FOOD', DICE_3_FOOD);
+        return food;
     }
 
     totalOptionalFood()
     {
-        return this.total('FOOD', DICE_2_FOOD_OR_2_WORKERS);
+        var food = 0;
+        for( var i in this.dice ) {
+            food += this.dice[i].optionalFood();
+        }
+        return food;
     }
 
-    totalFixedWorkers()
+    totalWorkers()
     {
-        return this.total('WORKERS', DICE_3_WORKERS);
+        var workers = 0;
+        for( var i in this.dice ) {
+            workers += this.dice[i].workers();
+        }
+        return workers;
     }
 
     totalOptionalWorkers()
     {
-        return this.total('WORKERS', DICE_2_FOOD_OR_2_WORKERS);
+        var workers = 0;
+        for( var i in this.dice ) {
+            workers += this.dice[i].optionalWorkers();
+        }
+        return workers;
     }
 
     totalGoods()
     {
-        return this.total('GOODS');
+        var goods = 0;
+        for( var i in this.dice ) {
+            goods += this.dice[i].goods();
+        }
+        return goods;
     }
 
     totalCoins()
     {
-        return this.total('COINS');
+        var coins = 0;
+        for( var i in this.dice ) {
+            coins += this.dice[i].coins();
+        }
+        return coins;
     }
 
     totalSkulls()
     {
-        return this.total('SKULLS');
+        var skulls = 0;
+        for( var i in this.dice ) {
+            if( this.dice[i].isSkull ) {
+                skulls++;
+            }
+        }
+        return skulls;
     }
 
     isAllSkulls()
@@ -318,9 +264,9 @@ class Dice
     debug()
     {
         console.log(this.dice);
-        console.log("FOOD: "+this.totalFixedFood());
+        console.log("FOOD: "+this.totalFood());
         console.log("OPTIONAL FOOD: "+this.totalOptionalFood());
-        console.log("FIXED WORKERS: "+this.totalFixedWorkers());
+        console.log("FIXED WORKERS: "+this.totalWorkers());
         console.log("OPTIONAL WORKERS: "+this.totalOptionalWorkers());
         console.log("GOODS: "+this.totalGoods());
         console.log("COINS: "+this.totalCoins());

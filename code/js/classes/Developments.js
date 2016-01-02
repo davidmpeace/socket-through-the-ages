@@ -29,6 +29,7 @@ class Developments
         this.developments.push( new Development(this, 'Engineering',  'Use stone for 3 workers each',   40,   6) );
         this.developments.push( new Development(this, 'Architecture', 'Bonus pts: 1 / monument',        50,   8) );
         this.developments.push( new Development(this, 'Empire',       'Bonus pts: 1 / city',            60,   8) );
+        //this.developments.push( new Development(this, 'Nourishment',  'Dont feed cities (1 turn)',      100,  10) );
     }
 
     /**
