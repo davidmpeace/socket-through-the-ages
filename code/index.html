@@ -110,21 +110,28 @@
 
                             <div class="panel-body">
                                 <div id="myDice" class="row">
-                                    <div class='bg-success leadership' ng-if="currentPlayer.isStage('TURN_STAGE_LEADERSHIP')">LEADERSHIP: Click a dice to re-roll, or click Done.</div>
+                                    <div class='bg-success leadership' ng-if="currentPlayer.isStage('TURN_STAGE_LEADERSHIP')">
+                                        LEADERSHIP: Click a dice to re-roll, or 
+                                        <button class='btn btn-danger' ng-click='skipLeadership()'>Skip</button>
+                                    </div>
                                     <div class='col-xs-10' style='text-align:center'>
                                         <div ng-repeat='dice in currentPlayer.dice.dice track by $index' class='diceContainer' style='vertical-align: top'>
                                             <div ng-click="diceClicked($index)" class='dice' ng-class="{'skull': dice.isSkull, 'choice': canClickDice(dice), 'unset': (dice.face == '2_FOOD_OR_2_WORKERS'), 'keep': currentPlayer.isStage('TURN_STAGE_ROLLING') && (dice.keep || dice.isSkull)}">
                                                 <img ng-src='img/{{dice.face}}.png'  />
                                             </div>
                                             
-                                            <button class='btn btn-primary btn-xs' ng-if="dice.variable && !currentPlayer.dice.diceFinalized" ng-click="toggleType($index)">Change</button>
+                                            <button class='btn btn-primary btn-xs' ng-if="dice.variable && !currentPlayer.dice.canRoll && !currentPlayer.dice.canRollLeadershipDie() && !currentPlayer.dice.diceFinalized" ng-click="toggleType($index)">
+                                                Change
+                                            </button>
                                         </div>
                                     </div>
 
                                     <div class='col-xs-2'>
                                         <p><button ng-show="currentPlayer.canRoll()" class='btn btn-primary' ng-click='rollDice()'>Roll Dice</button></p>
                                         
-                                        <p><button ng-show="currentPlayer.canFinalizeDice()" class='btn btn-warning' ng-click='doneRolling()'>Done</button></p>
+                                        <p><button ng-show="currentPlayer.dice.rollsCompleted > 0 && currentPlayer.dice.canRoll" class='btn btn-warning' ng-click='doneRolling()'>Done</button></p>
+
+                                        <p><button ng-show="currentPlayer.dice.rollsCompleted > 0 && !currentPlayer.dice.canRoll && !currentPlayer.dice.diceFinalized && !currentPlayer.isStage('TURN_STAGE_LEADERSHIP')" class='btn btn-info' ng-click='finalizeDice()' ng-disabled="currentPlayer.dice.hasOptionalDice()">Finished</button></p>
 
                                     </div>
                                 </div>
@@ -568,7 +575,17 @@
                 $scope.currentPlayer.dice.toggleType(diceIndex);
             }
 
+            $scope.skipLeadership = function()
+            {
+                $scope.currentPlayer.skipLeadershipDie();
+            }
+
             $scope.doneRolling = function()
+            {
+                $scope.currentPlayer.completeRolling();
+            }
+
+            $scope.finalizeDice = function()
             {
                 $scope.currentPlayer.finalizeDice();
             }

@@ -85,7 +85,7 @@ class Player
 
     canRoll()
     {
-        return this.isMyTurn() && (this.turnStage == TURN_STAGE_START || this.turnStage == TURN_STAGE_ROLLING);
+        return this.isMyTurn() && (this.turnStage == TURN_STAGE_START || (this.turnStage == TURN_STAGE_ROLLING && this.dice.canRoll));
     }
 
     isInOneOfStages(arrayOfAcceptableStages)
@@ -127,12 +127,35 @@ class Player
         }
     }
 
+    completeRolling()
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_ROLLING]) ) { return; }
+
+        this.dice.completeRolling();
+
+        if( this.dice.canRollLeadershipDie() ) {
+            this.turnStage = TURN_STAGE_LEADERSHIP;
+        } else {
+            this.rollComplete();
+        }
+    }
+
     rollLeadershipDie( dieIndex )
     {
         if( !this.isMyTurn() ) { return; }
         if( !this.isInOneOfStages([TURN_STAGE_LEADERSHIP]) ) { return; }
 
         this.dice.rollLeadershipDie(dieIndex);
+        this.rollComplete();
+    }
+
+    skipLeadershipDie()
+    {
+        if( !this.isMyTurn() ) { return; }
+        if( !this.isInOneOfStages([TURN_STAGE_LEADERSHIP]) ) { return; }
+        
+        this.dice.skipLeadershipDie();
         this.rollComplete();
     }
 

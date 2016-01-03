@@ -65,7 +65,7 @@ class Dice
             this.rollsCompleted++;
 
             if( this.isAllSkulls() ) {
-                this.rollsCompleted = MAX_ROLLS; // Set to max rolls if all are skulls, because there's nothing more to do
+                this.completeRolling(); // Set to max rolls if all are skulls, because there's nothing more to do
             }
 
             this.canRoll = (this.rollsCompleted < MAX_ROLLS);
@@ -81,6 +81,17 @@ class Dice
 
         this.dice[dieIndex].roll();
         this.rollsCompleted++;
+    }
+
+    skipLeadershipDie()
+    {
+        this.rollsCompleted++;
+    }
+
+    completeRolling()
+    {
+        this.rollsCompleted = MAX_ROLLS;
+        this.canRoll = (this.rollsCompleted < MAX_ROLLS);
     }
 
     /**
